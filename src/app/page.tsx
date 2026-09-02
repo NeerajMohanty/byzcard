@@ -1,50 +1,57 @@
-import Link from "next/link";
-import { ExampleCard } from "@/components/ExampleCard";
+import type { Metadata } from "next";
+import { githubUrl } from "@/features/landing/github";
+import { LandingNav } from "@/features/landing/LandingNav";
+import { Hero } from "@/features/landing/Hero";
+import { TrustStrip } from "@/features/landing/TrustStrip";
+import { HowItWorks } from "@/features/landing/HowItWorks";
+import { SharingWays } from "@/features/landing/SharingWays";
+import { PrivacySection } from "@/features/landing/PrivacySection";
+import { UseCases } from "@/features/landing/UseCases";
+import { PrintSection } from "@/features/landing/PrintSection";
+import { OpenSourceSection } from "@/features/landing/OpenSourceSection";
+import { FinalCta } from "@/features/landing/FinalCta";
+import { LandingFooter } from "@/features/landing/LandingFooter";
+import styles from "@/features/landing/landing.module.css";
+
+export const metadata: Metadata = {
+  title: "BYZCARD — Your business card, on your phone",
+  description:
+    "Create a private, local-first digital business card. Share it by QR, keep it on your Home Screen, save contacts, print cards and badges — no account required.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "BYZCARD — Your business card, on your phone",
+    description:
+      "Create a digital business card in your browser, stored on your device. Share it by QR — no app, account, or subscription required.",
+    type: "website",
+    url: "/",
+    siteName: "BYZCARD",
+    images: [{ url: "/icons/icon-512.png", width: 512, height: 512, alt: "BYZCARD" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "BYZCARD — Your business card, on your phone",
+    description:
+      "A local-first digital business card. Share by QR, save to contacts, print cards and badges — no account required.",
+  },
+};
 
 export default function LandingPage() {
+  const github = githubUrl();
   return (
-    <div>
-      <header style={{ padding: "18px 0 26px" }}>
-        <p
-          style={{
-            fontSize: 13,
-            fontWeight: 700,
-            letterSpacing: "0.22em",
-            color: "var(--text-dim)",
-            margin: 0,
-          }}
-        >
-          BYZCARD
-        </p>
-        <h1 style={{ fontSize: 28, lineHeight: 1.25, margin: "14px 0 10px" }}>
-          Create your digital business card.
-        </h1>
-        <p className="note" style={{ fontSize: 15, margin: 0 }}>
-          Keep it on your phone. Share it from Wallet.
-        </p>
-      </header>
-
-      <ExampleCard />
-
-      <div className="stack" style={{ marginTop: 24 }}>
-        <Link className="btn btn-primary" href="/create">
-          Create your card
-        </Link>
-      </div>
-
-      <section style={{ marginTop: 32 }}>
-        <h2 className="section-title">Private by architecture</h2>
-        <p className="note">
-          Your card is created and stored locally on your device. BYZCARD has no accounts and no
-          card database, and does not store your card, photo, or contact information. When you
-          explicitly add your card to Apple Wallet or Google Wallet, the information needed to
-          create that pass is transmitted once for signing and is not retained.
-        </p>
-        <p className="note">
-          The QR code carries your card inside the link itself — scanning it opens the card directly
-          on the other person’s phone, with no lookup on any server.
-        </p>
-      </section>
+    <div className={styles.page}>
+      <LandingNav github={github} />
+      <main>
+        <Hero />
+        <TrustStrip />
+        <HowItWorks />
+        <SharingWays />
+        <PrivacySection />
+        <UseCases />
+        <PrintSection />
+        <OpenSourceSection github={github} />
+        <FinalCta />
+      </main>
+      <LandingFooter github={github} />
     </div>
   );
 }

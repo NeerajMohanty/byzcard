@@ -32,7 +32,7 @@ body {
   text-size-adjust: 100%;
 }
 
-main {
+.app-shell {
   max-width: 480px;
   margin: 0 auto;
   padding: 16px 16px 48px;
@@ -210,7 +210,7 @@ input {
     background: #ffffff;
   }
 
-  main {
+  .app-shell {
     max-width: none;
     margin: 0;
     padding: 0;

@@ -9,6 +9,10 @@ import { solidPng } from "../src/server/png";
 export const BASE_ALLOWED_CONSOLE: readonly RegExp[] = [
   /was preloaded using link preload but not used within/u,
   /wallet-config.*(access control checks|aborted|cancelled)/u,
+  // Same WebKit behavior for a Next.js RSC payload fetch (framework
+  // navigation plumbing for public pages, no card data) aborted by an
+  // immediate follow-up navigation.
+  /_rsc=.*(access control checks|aborted|cancelled)/u,
 ];
 
 /** Per-spec console cleanliness guard (errors, warnings, page errors). */

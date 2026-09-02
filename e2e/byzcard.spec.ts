@@ -21,14 +21,12 @@ test.afterEach(() => {
 
 test("landing page renders the pitch and a real example card", async ({ page }) => {
   await page.goto("/");
-  await expect(
-    page.getByRole("heading", { name: /Create your digital business card/u }),
-  ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Create your card" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Your business card/u })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Create my card" }).first()).toBeVisible();
   // Example card renders with a locally generated QR.
-  await expect(page.getByText("Maya Castellanos")).toBeVisible();
-  await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
-  await expect(page.getByText(/no accounts and no card database/u)).toBeVisible();
+  await expect(page.getByText("Maya Castellanos").first()).toBeVisible();
+  await expect(page.getByRole("img", { name: /QR code/u }).first()).toBeVisible();
+  await expect(page.getByText("They don’t need BYZCARD installed.")).toBeVisible();
 });
 
 test("create → live preview → save → persist across reload → edit", async ({ page }) => {

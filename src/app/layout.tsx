@@ -2,10 +2,13 @@ import type { Metadata, Viewport } from "next";
 import { SwRegister } from "@/components/SwRegister";
 import "./globals.css";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "BYZCARD — your business card, on your phone",
+  metadataBase: new URL(APP_URL),
+  title: "BYZCARD — Your business card, on your phone",
   description:
-    "Create a digital business card that lives on your phone. No account, no database — share it from your Wallet with a QR code.",
+    "Create a private, local-first digital business card. Share it by QR, keep it on your Home Screen, save contacts, print cards and badges — no account required.",
   applicationName: "BYZCARD",
   appleWebApp: {
     capable: true,
@@ -24,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <main>{children}</main>
+        {children}
         <SwRegister />
       </body>
     </html>

@@ -1,0 +1,653 @@
+/* ── BYZCARD marketing homepage — isolated from all application UI ── */
+
+.page {
+  background: var(--bg);
+  overflow-x: clip;
+}
+
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ── Navigation ── */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(5, 7, 13, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--card-edge);
+}
+
+.navInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 60px;
+}
+
+.wordmark {
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: 0.2em;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.navLinks {
+  display: none;
+  gap: 26px;
+}
+
+.navLinks a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.navLinks a:hover,
+.navLinks a:focus-visible {
+  color: var(--text);
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+@media (min-width: 900px) {
+  .navLinks {
+    display: flex;
+  }
+}
+
+/* Inline (non-full-width) variants of the shared button classes. */
+.btnInline {
+  width: auto;
+  min-height: 44px;
+  padding: 10px 20px;
+}
+
+.btnLarge {
+  width: auto;
+  min-height: 52px;
+  padding: 14px 28px;
+  font-size: 17px;
+}
+
+/* ── Hero ── */
+
+.hero {
+  padding: 56px 0 64px;
+}
+
+.heroGrid {
+  display: grid;
+  gap: 44px;
+  align-items: center;
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.22em;
+  color: var(--text-dim);
+  margin: 0 0 18px;
+}
+
+.heroTitle {
+  font-size: clamp(36px, 9vw, 56px);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  margin: 0 0 18px;
+}
+
+.heroCopy {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  max-width: 46ch;
+  margin: 0 0 8px;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.trustLine {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--label);
+}
+
+.heroCard {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+@media (min-width: 960px) {
+  .hero {
+    padding: 88px 0 96px;
+  }
+
+  .heroGrid {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 72px;
+  }
+
+  .heroCard {
+    margin: 0 0 0 auto;
+  }
+}
+
+/* ── Section scaffolding ── */
+
+.section {
+  padding: 72px 0;
+}
+
+.sectionAlt {
+  background: #090e1b;
+  border-top: 1px solid var(--card-edge);
+  border-bottom: 1px solid var(--card-edge);
+}
+
+.sectionHead {
+  max-width: 680px;
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  font-size: clamp(27px, 5.5vw, 42px);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  margin: 0 0 12px;
+}
+
+.lede {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+@media (min-width: 960px) {
+  .section {
+    padding: 104px 0;
+  }
+}
+
+/* ── Trust strip ── */
+
+.trustStrip {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 1px solid var(--card-edge);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.trustCell {
+  padding: 18px 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  border: 0 solid var(--card-edge);
+}
+
+.trustCell:nth-child(odd) {
+  border-right-width: 1px;
+}
+
+.trustCell:nth-child(-n + 2) {
+  border-bottom-width: 1px;
+}
+
+@media (min-width: 800px) {
+  .trustStrip {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .trustCell {
+    border-bottom-width: 0 !important;
+    border-right-width: 1px;
+  }
+
+  .trustCell:last-child {
+    border-right-width: 0;
+  }
+}
+
+/* ── How it works ── */
+
+.steps {
+  display: grid;
+  gap: 16px;
+}
+
+.step {
+  background: var(--surface);
+  border: 1px solid var(--card-edge);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.stepNum {
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  color: var(--label);
+  margin: 0 0 10px;
+}
+
+.stepTitle {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.stepCopy {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.noAppLine {
+  margin: 28px 0 0;
+  font-size: 16px;
+  font-weight: 650;
+  text-align: center;
+}
+
+@media (min-width: 700px) {
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1060px) {
+  .steps {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ── Meet → Scan → Save demo ── */
+
+.demo {
+  margin-top: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.demoPhone {
+  width: min(300px, 88vw);
+  background: var(--surface);
+  border: 1px solid var(--card-edge);
+  border-radius: 26px;
+  padding: 14px;
+}
+
+.demoLabel {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--label);
+  text-align: center;
+  margin: 0 0 10px;
+}
+
+.demoArrow {
+  color: var(--label);
+  flex-shrink: 0;
+}
+
+.recipientMock {
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.recipientTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.recipientName {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.recipientMeta {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 2px 0 0;
+}
+
+.recipientRow {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 4px 0 0;
+}
+
+.savePill {
+  margin-top: 14px;
+  background: var(--accent);
+  color: #0b1220;
+  border-radius: 12px;
+  font-weight: 650;
+  font-size: 14px;
+  text-align: center;
+  padding: 11px 0;
+}
+
+.demoCaption {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--label);
+  text-align: center;
+}
+
+@media (min-width: 960px) {
+  .demo {
+    flex-direction: row;
+    justify-content: center;
+    gap: 18px;
+  }
+}
+
+/* ── Feature / use-case grids ── */
+
+.featureGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.featureCard {
+  background: var(--surface);
+  border: 1px solid var(--card-edge);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.featureKicker {
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--label);
+  margin: 0 0 10px;
+}
+
+.featureTitle {
+  font-size: 17px;
+  margin: 0 0 8px;
+}
+
+.featureCopy {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+@media (min-width: 700px) {
+  .featureGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1060px) {
+  .featureGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ── Privacy comparison ── */
+
+.privacyPoints {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+@media (min-width: 700px) {
+  .privacyPoints {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1060px) {
+  .privacyPoints {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.compareGrid {
+  display: grid;
+  gap: 20px;
+}
+
+.comparePanel {
+  border: 1px solid var(--card-edge);
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.comparePanelByz {
+  background: var(--surface);
+}
+
+.compareTitle {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 18px;
+}
+
+.compareStep {
+  font-size: 14px;
+  color: var(--text-dim);
+  padding: 10px 12px;
+  border: 1px solid var(--card-edge);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.comparePanelByz .compareStep {
+  color: var(--text);
+}
+
+.compareDown {
+  text-align: center;
+  color: var(--label);
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 3px 0;
+}
+
+@media (min-width: 860px) {
+  .compareGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+}
+
+/* ── Print section ── */
+
+.printGrid {
+  display: grid;
+  gap: 36px;
+  align-items: center;
+}
+
+.printMocks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 26px;
+}
+
+.mockCr80 {
+  width: min(320px, 86vw);
+  aspect-ratio: 3.375 / 2.125;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.mockBadge {
+  width: min(190px, 60vw);
+  aspect-ratio: 4 / 6;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 10px;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.mockLabel {
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.18em;
+  color: var(--label);
+  margin: 0;
+}
+
+.mockName {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 2px 0 0;
+}
+
+.mockMeta {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin: 2px 0 0;
+}
+
+.mockQr {
+  width: 86px;
+  flex-shrink: 0;
+  margin: auto 0 auto auto;
+}
+
+.mockBadgeQr {
+  width: 96px;
+  margin-top: auto;
+}
+
+.mockCaption {
+  font-size: 13px;
+  color: var(--label);
+  text-align: center;
+  margin: 10px 0 0;
+}
+
+.printFormats {
+  display: grid;
+  gap: 14px;
+  margin: 26px 0;
+}
+
+@media (min-width: 960px) {
+  .printGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+  }
+}
+
+/* ── Final CTA + editorial ── */
+
+.editorial {
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.finalCta {
+  text-align: center;
+  padding: 88px 0 96px;
+}
+
+.finalNote {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--label);
+}
+
+/* ── Footer ── */
+
+.footer {
+  border-top: 1px solid var(--card-edge);
+  padding: 44px 0 56px;
+}
+
+.footerGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.footerTag {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin: 10px 0 0;
+}
+
+.footerLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footerLinks a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.footerLinks a:hover,
+.footerLinks a:focus-visible {
+  color: var(--text);
+}
+
+.footerCopyright {
+  margin-top: 36px;
+  font-size: 13px;
+  color: var(--label);
+}
+
+/* Smooth in-page anchor scrolling, honoring reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .page {
+    scroll-behavior: smooth;
+  }
+}
+
+.anchorTarget {
+  scroll-margin-top: 76px;
+}

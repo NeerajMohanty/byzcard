@@ -15,8 +15,8 @@ const cardArticle = (page: Page) => page.getByRole("article", { name: "Business 
 
 async function captureLanding(page: Page, shot: (name: string) => string): Promise<void> {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: "Create your card" })).toBeVisible();
-  await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Create my card" }).first()).toBeVisible();
+  await expect(page.getByRole("img", { name: /QR code/u }).first()).toBeVisible();
   await page.screenshot({ path: shot("01-landing"), fullPage: true });
 }
 

@@ -1,0 +1,79 @@
+.card {
+  background: linear-gradient(160deg, #0e1730 0%, #0b1220 55%, #0a101c 100%);
+  border: 1px solid var(--card-edge);
+  border-radius: var(--radius-card);
+  padding: 20px 20px 22px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  color: var(--text);
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--label);
+  margin: 0 0 2px;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+  text-align: right;
+  min-height: 40px;
+}
+
+.companyName {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  max-width: 70%;
+  overflow-wrap: anywhere;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 18px 0 20px;
+}
+
+.identityText {
+  min-width: 0;
+}
+
+.name {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.contact {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.contactValue {
+  font-size: 15px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.qrWrap {
+  display: flex;
+  justify-content: center;
+}
+
+.qrBox {
+  width: 168px;
+  max-width: 60%;
+}
+
+.placeholder {
+  color: var(--label);
+}

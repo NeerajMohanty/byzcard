@@ -1,0 +1,28 @@
+# dependencies
+/node_modules
+
+# next.js build output
+/.next
+/out
+
+# production
+/build
+
+# environment / secrets — never commit real credentials
+.env
+.env.local
+.env.*.local
+*.p12
+*.cer
+/secrets
+
+# test artifacts
+/coverage
+/test-results
+/playwright-report
+/blob-report
+
+# misc
+.DS_Store
+*.tsbuildinfo
+npm-debug.log*

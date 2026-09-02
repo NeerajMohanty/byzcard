@@ -1,0 +1,272 @@
+/**
+ * End-to-end browser verification of the complete BYZCARD flow.
+ * Runs against a production build (see playwright.config.ts) with test
+ * Wallet fixtures configured, across phone / large-phone / desktop
+ * viewports. Console errors and page errors fail the tests.
+ */
+import { expect, test, type ConsoleMessage, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { solidPng } from "../src/server/png";
+
+const consoleErrors: string[] = [];
+/** Patterns allowed for a single test (e.g. expected offline fetch noise). */
+let allowedPatterns: RegExp[] = [];
+
+function watchConsole(page: Page): void {
+  page.on("console", (message: ConsoleMessage) => {
+    if (message.type() === "error" || message.type() === "warning") {
+      consoleErrors.push(`[${message.type()}] ${message.text()}`);
+    }
+  });
+  page.on("pageerror", (error) => {
+    consoleErrors.push(`[pageerror] ${error.message}`);
+  });
+}
+
+test.beforeEach(({ page }) => {
+  consoleErrors.length = 0;
+  allowedPatterns = [];
+  watchConsole(page);
+});
+
+test.afterEach(() => {
+  const unexpected = consoleErrors.filter(
+    (entry) => !allowedPatterns.some((pattern) => pattern.test(entry)),
+  );
+  expect(unexpected, "browser console must be clean").toEqual([]);
+});
+
+async function createCard(page: Page, withPhoto = true): Promise<void> {
+  await page.goto("/create");
+  await page.getByLabel("Full name").fill("Ada Lovelace");
+  await page.getByLabel("Role / title").fill("Chief Analyst");
+  await page.getByLabel("Company").fill("Analytical Engines");
+  await page.getByLabel("Phone").fill("+1 647 000 0000");
+  await page.getByLabel("Email").fill("ada@example.com");
+  await page.getByLabel(/Website/u).fill("example.com");
+  if (withPhoto) {
+    await page.getByLabel(/Professional photo/u).setInputFiles({
+      name: "photo.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(solidPng(64, 120, 90, 60)),
+    });
+    await expect(page.getByAltText("Photo of Ada Lovelace").first()).toBeVisible();
+  }
+  await page.getByRole("button", { name: "Save card" }).click();
+  await page.waitForURL("**/card");
+}
+
+test("landing page renders the pitch and a real example card", async ({ page }) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: /Create your digital business card/u }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Create your card" })).toBeVisible();
+  // Example card renders with a locally generated QR.
+  await expect(page.getByText("Maya Castellanos")).toBeVisible();
+  await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
+  await expect(page.getByText(/no accounts and no card database/u)).toBeVisible();
+});
+
+test("create → live preview → save → persist across reload → edit", async ({ page }) => {
+  await page.goto("/create");
+  // Live preview updates while typing.
+  await page.getByLabel("Full name").fill("Ada Lovelace");
+  await expect(page.getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
+
+  await createCard(page);
+  await expect(page.getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
+  await expect(page.getByAltText("Photo of Ada Lovelace").first()).toBeVisible();
+  await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
+
+  // Persistence across reload.
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
+  await expect(page.getByAltText("Photo of Ada Lovelace").first()).toBeVisible();
+
+  // Edit and persist again.
+  await page.getByRole("link", { name: "Edit card" }).click();
+  await page.getByLabel("Role / title").fill("Director of Research");
+  await page.getByRole("button", { name: "Save card" }).click();
+  await page.waitForURL("**/card");
+  await page.reload();
+  await expect(page.getByText("Director of Research")).toBeVisible();
+});
+
+test("QR share URL opens the recipient card with no photo fetch and no card request", async ({
+  page,
+  context,
+}) => {
+  await createCard(page);
+  const shareUrl = await page.locator("[data-share-url]").getAttribute("data-share-url");
+  expect(shareUrl).not.toBeNull();
+  expect(shareUrl).toContain("/s#");
+  expect(shareUrl?.indexOf("#")).toBeGreaterThan(0);
+
+  // Open in a fresh page and record every request: the fragment must never
+  // be sent, and no image may be fetched.
+  const recipient = await context.newPage();
+  watchConsole(recipient);
+  const requests: string[] = [];
+  recipient.on("request", (request) => requests.push(request.url()));
+  await recipient.goto(shareUrl ?? "");
+
+  await expect(recipient.getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
+  await expect(recipient.getByText("Chief Analyst")).toBeVisible();
+  await expect(recipient.getByText("Analytical Engines")).toBeVisible();
+  await expect(recipient.getByText("+1 647 000 0000")).toBeVisible();
+  await expect(recipient.getByRole("button", { name: "Save contact" })).toBeVisible();
+  // Initials avatar, never a photo element.
+  await expect(recipient.getByText("AL", { exact: true })).toBeVisible();
+  expect(await recipient.locator("img").count()).toBe(0);
+
+  for (const url of requests) {
+    expect(url, "fragment must never reach the network").not.toContain("#");
+    expect(url).not.toMatch(/\.(jpe?g|webp)(\?|$)/u);
+  }
+
+  // Save contact downloads a .vcf generated locally.
+  const downloadPromise = recipient.waitForEvent("download");
+  await recipient.getByRole("button", { name: "Save contact" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("ada-lovelace.vcf");
+  const path = await download.path();
+  const vcf = readFileSync(path, "utf8");
+  expect(vcf).toContain("BEGIN:VCARD");
+  expect(vcf).toContain("FN:Ada Lovelace");
+  expect(vcf).not.toContain("PHOTO"); // photo never travels in the link
+  await recipient.close();
+});
+
+test("recipient page shows a clear error for a damaged link", async ({ page }) => {
+  await page.goto("/s#pBROKENPAYLOAD");
+  await expect(page.getByText(/damaged or incomplete/u)).toBeVisible();
+});
+
+test("export backup, delete local data, then import restores card and photo", async ({ page }) => {
+  await createCard(page);
+
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: /Export card/u }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("ada-lovelace.byzcard");
+  const backupPath = await download.path();
+  const backup = JSON.parse(readFileSync(backupPath, "utf8")) as {
+    format: string;
+    card: { fullName: string };
+    photo?: { dataBase64: string };
+  };
+  expect(backup.format).toBe("byzcard-backup");
+  expect(backup.card.fullName).toBe("Ada Lovelace");
+  expect(backup.photo?.dataBase64.length ?? 0).toBeGreaterThan(100);
+
+  // Delete everything locally.
+  page.on("dialog", (dialog) => void dialog.accept());
+  await page.getByRole("button", { name: /Delete card/u }).click();
+  await page.waitForURL(/\/$/u);
+  await page.goto("/card");
+  await page.waitForURL("**/create"); // no card → redirected
+
+  // Import from the editor (fresh-device path).
+  await page.getByLabel("Import a .byzcard backup file").setInputFiles(backupPath);
+  await page.waitForURL("**/card");
+  await expect(page.getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
+  await expect(page.getByAltText("Photo of Ada Lovelace").first()).toBeVisible();
+});
+
+test("wallet buttons appear when configured and produce signed artifacts", async ({
+  page,
+  browserName,
+  isMobile,
+}) => {
+  test.skip(isMobile, "wallet platform gating differs per device; tested on desktop");
+  expect(browserName).toBe("chromium");
+  await createCard(page);
+
+  // Desktop (neither iOS nor Android) shows both configured wallets.
+  const appleButton = page.getByRole("button", { name: "Add to Apple Wallet" });
+  const googleButton = page.getByRole("button", { name: "Add to Google Wallet" });
+  await expect(appleButton).toBeVisible();
+  await expect(googleButton).toBeVisible();
+
+  // Apple: endpoint returns a signed .pkpass.
+  const appleResponse = page.waitForResponse("**/api/apple-pass");
+  await appleButton.click();
+  const applePass = await appleResponse;
+  expect(applePass.status()).toBe(200);
+  expect(applePass.headers()["content-type"]).toBe("application/vnd.apple.pkpass");
+  expect(applePass.headers()["cache-control"]).toBe("no-store");
+  expect(applePass.headers()["cache-control"]).toBe("no-store");
+  // (Signed pass bytes are validated in the unit suite; the blob navigation
+  // that follows the click discards the response body here.)
+
+  // Google: endpoint returns a save URL (external navigation stubbed).
+  await page.goto("/card");
+  await page.route("https://pay.google.com/**", (route) =>
+    route.fulfill({ status: 200, contentType: "text/html", body: "<title>stub</title>" }),
+  );
+  const googleResponse = page.waitForResponse("**/api/google-pass");
+  await page.getByRole("button", { name: "Add to Google Wallet" }).click();
+  const googleSave = await googleResponse;
+  expect(googleSave.status()).toBe(200);
+  expect(googleSave.headers()["cache-control"]).toBe("no-store");
+  // The client navigates to the returned save URL (stubbed above) — the
+  // navigation itself proves the signed URL round-trip; JWT content is
+  // validated in the unit suite.
+  await page.waitForURL(/pay.google.com/u);
+});
+
+test("wallet section reports unconfigured state honestly", async ({ page }) => {
+  await page.route("**/api/wallet-config", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "cache-control": "no-store" },
+      body: JSON.stringify({ apple: false, google: false }),
+    }),
+  );
+  await createCard(page, false);
+  await expect(page.getByText(/Wallet passes are not configured/u)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Apple Wallet/u })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Google Wallet/u })).toHaveCount(0);
+});
+
+test("NFC panel is honest on unsupported browsers and shows payload size", async ({ page }) => {
+  await createCard(page, false);
+  // Chromium desktop/mobile-emulation has no NDEFReader.
+  await expect(page.getByText(/NFC tag writing is not available from this browser/u)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Write to NFC tag/u })).toHaveCount(0);
+});
+
+test("core app works offline after first load (no PWA install)", async ({ page, context }) => {
+  await createCard(page);
+  // Ensure the service worker is active and has precached the shell.
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+  });
+  await page.waitForTimeout(500);
+
+  // Failed network fetches while offline are expected and logged by the
+  // browser itself; everything else must stay clean.
+  allowedPatterns = [/Failed to load resource/u, /net::ERR/u, /Failed to fetch/u];
+  await context.setOffline(true);
+  await page.reload();
+
+  // Card loads from IndexedDB through the cached shell.
+  await expect(page.getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
+  await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
+  // Wallet honestly reports that a connection is needed.
+  await expect(page.getByText(/Wallet passes need an internet connection/u)).toBeVisible();
+
+  // Contact QR (vCard) still renders offline.
+  await page.getByRole("button", { name: /Show contact QR/u }).click();
+  await expect(page.getByRole("img", { name: /vCard/u })).toBeVisible();
+
+  // Export still works offline.
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: /Export card/u }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("ada-lovelace.byzcard");
+
+  await context.setOffline(false);
+});

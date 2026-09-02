@@ -1,0 +1,66 @@
+.card {
+  background: linear-gradient(160deg, #0e1730 0%, #0b1220 55%, #0a101c 100%);
+  border: 1px solid var(--card-edge);
+  border-radius: var(--radius-card);
+  padding: 22px 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.identity {
+  min-width: 0;
+}
+
+.name {
+  font-size: 22px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.role {
+  margin: 2px 0 0;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.company {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.details {
+  margin: 20px 0 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 16px;
+}
+
+.details dt {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--label);
+  align-self: center;
+}
+
+.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.details a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.details a:hover,
+.details a:focus-visible {
+  text-decoration: underline;
+}

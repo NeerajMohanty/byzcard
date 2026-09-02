@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "BYZCARD — mobile-first digital business card. Local-first, zero card storage.",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

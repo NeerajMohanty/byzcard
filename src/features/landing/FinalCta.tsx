@@ -18,14 +18,16 @@ export function FinalCta() {
       </section>
       <section className={styles.finalCta}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>Your next introduction doesn’t need another app.</h2>
-          <p className={styles.lede} style={{ margin: "0 0 26px" }}>
+          <h2 className={styles.sectionTitle} style={{ marginBottom: 26 }}>
             Create your BYZCARD in a minute.
-          </p>
-          <Link href="/create" className={`btn btn-primary ${styles.btnLarge}`}>
+          </h2>
+          <Link
+            href="/create"
+            className={`btn btn-primary ${styles.btnLarge} ${styles.ctaCompact}`}
+          >
             Create my card
           </Link>
-          <p className={styles.finalNote}>No signup. No credit card. No account.</p>
+          <p className={styles.finalNote}>No signup. No credit card. No subscription.</p>
         </div>
       </section>
     </>

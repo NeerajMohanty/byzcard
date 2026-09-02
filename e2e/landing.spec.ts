@@ -19,7 +19,9 @@ test.afterEach(() => {
 
 test("loads with hero, real example card and QR", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: /Your business card/u })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: /Your next introduction/u }),
+  ).toBeVisible();
   await expect(page.getByText("Maya Castellanos").first()).toBeVisible();
   await expect(page.getByRole("img", { name: /QR code/u }).first()).toBeVisible();
   // No GitHub links without configuration.

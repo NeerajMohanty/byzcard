@@ -21,8 +21,8 @@ describe("marketing homepage", () => {
     renderLanding();
     const h1s = screen.getAllByRole("heading", { level: 1 });
     expect(h1s).toHaveLength(1);
-    expect(h1s[0]?.textContent).toContain("Your business card.");
-    expect(h1s[0]?.textContent).toContain("On your phone.");
+    expect(h1s[0]?.textContent).toContain("Your next introduction");
+    expect(h1s[0]?.textContent).toContain("another app.");
   });
 
   it("every Create-my-card CTA links to /create", () => {
@@ -38,6 +38,12 @@ describe("marketing homepage", () => {
     expect(link.getAttribute("href")).toBe("#how-it-works");
     expect(container.querySelector("#how-it-works")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Meet. Scan. Save." })).toBeDefined();
+  });
+
+  it("hero keeps the product concrete and the free model prominent", () => {
+    const { container } = renderLanding();
+    expect(container.textContent).toContain("digital business card");
+    expect(screen.getByText("No signup. No subscription. No account.")).toBeDefined();
   });
 
   it("states that recipients don't need BYZCARD installed", () => {

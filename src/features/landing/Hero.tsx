@@ -9,15 +9,12 @@ export function Hero() {
       <div className={`${styles.container} ${styles.heroGrid}`}>
         <div>
           <p className={styles.eyebrow}>BYZCARD</p>
-          <h1 className={styles.heroTitle}>
-            Your business card.
-            <br />
-            On your phone.
-          </h1>
+          <h1 className={styles.heroTitle}>Your next introduction doesn’t need another app.</h1>
           <p className={styles.heroCopy}>
-            Create it once. Keep it on your phone. Share it whenever you meet someone.
+            Create your digital business card, keep it on your phone, and share it whenever you meet
+            someone.
           </p>
-          <p className={styles.heroCopy}>No app, account, or subscription required.</p>
+          <p className={styles.heroFree}>No signup. No subscription. No account.</p>
           <div className={styles.heroActions}>
             <Link href="/create" className={`btn btn-primary ${styles.btnLarge}`}>
               Create my card
@@ -26,7 +23,7 @@ export function Hero() {
               See how it works
             </a>
           </div>
-          <p className={styles.trustLine}>No signup · Stored on your device · Open source</p>
+          <p className={styles.trustLine}>Stored on your device · Works offline · Open source</p>
         </div>
         <div className={styles.heroCard}>
           <ExampleCard />

@@ -12,6 +12,7 @@
 .env
 .env.local
 .env.*.local
+.vercel
 *.p12
 *.cer
 /secrets

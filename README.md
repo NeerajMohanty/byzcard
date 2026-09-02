@@ -1,5 +1,7 @@
 # BYZCARD
 
+**Your next introduction doesn’t need another app.**
+
 A mobile-first digital business card that lives on your phone.
 
 - Card creation, editing, photo processing, QR generation, vCard generation,
@@ -83,6 +85,14 @@ everything else works.
 The share QR encodes the card into the URL **fragment** (`/s#…`), which
 browsers never transmit to the server — verified in the E2E suite by
 recording every network request during a recipient visit.
+
+## Design
+
+BYZCARD currently uses the platform-native system font stack; no web font
+is bundled. The stack is `-apple-system, BlinkMacSystemFont, "SF Pro Text",
+"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif` — Apple devices
+render San Francisco, Windows renders Segoe UI, and Android commonly falls
+back to Roboto.
 
 ## Dependencies
 

@@ -17,6 +17,7 @@
 /secrets
 
 # test artifacts
+/artifacts
 /coverage
 /test-results
 /playwright-report

@@ -15,8 +15,10 @@ export default defineConfig({
       use: { ...devices["Pixel 7"] },
     },
     {
-      name: "mobile-large",
-      use: { ...devices["iPhone 15 Pro Max"], browserName: "chromium" },
+      // Real WebKit engine at iPhone size — the closest automated Safari
+      // validation available. (Not equivalent to a physical iPhone test.)
+      name: "mobile-webkit",
+      use: { ...devices["iPhone 15 Pro Max"] },
     },
     {
       name: "desktop",

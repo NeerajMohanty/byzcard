@@ -38,8 +38,14 @@ export function WalletActions({ card, photo }: WalletActionsProps) {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    void fetchWalletAvailability().then(setAvailability);
+    // Aborting on unmount keeps navigation from killing an in-flight fetch
+    // uncleanly (WebKit logs interrupted fetches to the console).
+    const controller = new AbortController();
+    void fetchWalletAvailability(controller.signal).then((result) => {
+      if (!controller.signal.aborted) setAvailability(result);
+    });
     void loadWalletIds().then((ids) => setHasPassIdentity(ids.appleSerialNumber !== undefined));
+    return () => controller.abort();
   }, []);
 
   const available = availability !== null && availability !== "offline" ? availability : null;

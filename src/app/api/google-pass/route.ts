@@ -6,7 +6,13 @@
 import { encodeSharePayload } from "@/core/share/codec";
 import { analyzeShareSize, buildShareUrl } from "@/core/share/url";
 import { appUrl, googleWalletConfig } from "@/server/env";
-import { errorJson, noStoreJson, originAllowed, readJsonBody } from "@/server/http";
+import {
+  errorJson,
+  isJsonContentType,
+  noStoreJson,
+  originAllowed,
+  readJsonBody,
+} from "@/server/http";
 import { buildGoogleSaveUrl } from "@/server/google/jwt";
 import { parseWalletRequest } from "@/server/walletRequest";
 
@@ -19,6 +25,7 @@ export async function POST(request: Request): Promise<Response> {
   const config = googleWalletConfig();
   if (config === null) return errorJson(503, "google-wallet-not-configured");
   if (!originAllowed(request, appUrl())) return errorJson(403, "origin-not-allowed");
+  if (!isJsonContentType(request)) return errorJson(415, "unsupported-content-type");
 
   const body = await readJsonBody(request, GOOGLE_REQUEST_MAX_BYTES);
   if (body === null) return errorJson(400, "invalid-body");

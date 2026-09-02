@@ -11,8 +11,10 @@ A mobile-first digital business card that lives on your phone.
   nothing. Both are optional — without credentials the whole core still works.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full technical
-design and [docs/WALLET_SETUP.md](docs/WALLET_SETUP.md) for Wallet
-credential setup.
+design, [docs/WALLET_SETUP.md](docs/WALLET_SETUP.md) for Wallet credential
+setup, and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the production
+deployment requirements (edge rate limiting for the Wallet endpoints is a
+hard gate).
 
 ## Quick start
 
@@ -24,18 +26,19 @@ npm run dev                  # http://localhost:3000
 
 ## Scripts
 
-| Script                 | Purpose                                                        |
-| ---------------------- | -------------------------------------------------------------- |
-| `npm run dev`          | Development server                                             |
-| `npm run build`        | Production build                                               |
-| `npm run start`        | Serve the production build                                     |
-| `npm run format`       | Prettier write                                                 |
-| `npm run format:check` | Prettier check                                                 |
-| `npm run lint`         | ESLint (zero-`any`, 400-line file cap enforced)                |
-| `npm run typecheck`    | `tsc --noEmit` (strict)                                        |
-| `npm run test`         | Vitest unit + integration suite (106 tests)                    |
-| `npm run test:e2e`     | Playwright browser suite (3 viewports, offline, clean console) |
-| `npm run verify`       | format:check → lint → typecheck → test → build                 |
+| Script                        | Purpose                                                        |
+| ----------------------------- | -------------------------------------------------------------- |
+| `npm run dev`                 | Development server                                             |
+| `npm run build`               | Production build                                               |
+| `npm run start`               | Serve the production build                                     |
+| `npm run format`              | Prettier write                                                 |
+| `npm run format:check`        | Prettier check                                                 |
+| `npm run lint`                | ESLint (zero-`any`, 400-line file cap enforced)                |
+| `npm run typecheck`           | `tsc --noEmit` (strict)                                        |
+| `npm run test`                | Vitest unit + integration suite                                |
+| `npm run test:e2e`            | Playwright browser suite (3 viewports, offline, clean console) |
+| `npm run wallet:google:setup` | One-time Google Wallet class setup (see docs/WALLET_SETUP.md)  |
+| `npm run verify`              | format:check → lint → typecheck → test → build                 |
 
 ## Environment
 

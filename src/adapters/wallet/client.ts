@@ -12,9 +12,11 @@ export interface WalletAvailability {
 }
 
 /** "offline" when the availability check itself could not reach the server. */
-export async function fetchWalletAvailability(): Promise<WalletAvailability | "offline"> {
+export async function fetchWalletAvailability(
+  signal?: AbortSignal,
+): Promise<WalletAvailability | "offline"> {
   try {
-    const response = await fetch("/api/wallet-config", { cache: "no-store" });
+    const response = await fetch("/api/wallet-config", { cache: "no-store", signal });
     if (!response.ok) return { apple: false, google: false };
     const data: unknown = await response.json();
     if (typeof data !== "object" || data === null) return { apple: false, google: false };

@@ -145,6 +145,54 @@ describe("Apple .pkpass builder", () => {
     expect(checked).toBeGreaterThanOrEqual(6);
   });
 
+  it("omits thumbnails entirely when no photo is provided", () => {
+    const entries = readZipEntries(buildTestPass(false));
+    expect(entries.has("thumbnail.png")).toBe(false);
+    expect(entries.has("thumbnail@2x.png")).toBe(false);
+  });
+
+  it("icon assets are valid PNG files with correct dimensions", () => {
+    const entries = readZipEntries(buildTestPass());
+    const pngMagic = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+    for (const [name, expectedEdge] of [
+      ["icon.png", 29],
+      ["icon@2x.png", 58],
+      ["icon@3x.png", 87],
+    ] as const) {
+      const data = entries.get(name);
+      expect(data, name).toBeDefined();
+      if (data === undefined) continue;
+      expect([...data.subarray(0, 8)], `${name} magic`).toEqual(pngMagic);
+      // IHDR: width/height are big-endian u32 at offsets 16/20.
+      const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+      expect(view.getUint32(16), `${name} width`).toBe(expectedEdge);
+      expect(view.getUint32(20), `${name} height`).toBe(expectedEdge);
+    }
+  });
+
+  it("archive carries a valid end-of-central-directory record", () => {
+    const zip = buildTestPass();
+    const view = new DataView(zip.buffer, zip.byteOffset, zip.byteLength);
+    // EOCD (no comment) is the final 22 bytes.
+    const eocd = zip.length - 22;
+    expect(view.getUint32(eocd, true)).toBe(0x06054b50);
+    const entryCount = view.getUint16(eocd + 10, true);
+    expect(entryCount).toBe(6); // pass.json, 3 icons, manifest, signature
+  });
+
+  it("pass.json carries required metadata and barcode encoding", () => {
+    const entries = readZipEntries(buildTestPass());
+    const pass = JSON.parse(new TextDecoder().decode(entries.get("pass.json"))) as Record<
+      string,
+      unknown
+    >;
+    expect(pass.organizationName).toBe("BYZCARD");
+    expect(typeof pass.description).toBe("string");
+    expect((pass.description as string).length).toBeGreaterThan(0);
+    const barcodes = pass.barcodes as { messageEncoding: string; altText?: string }[];
+    expect(barcodes[0]?.messageEncoding).toBe("iso-8859-1");
+  });
+
   it("CMS output is deterministic for a fixed signing time", () => {
     const content = new TextEncoder().encode('{"test":"manifest"}');
     const [certDer] = pemToDer(config.certPem, "CERTIFICATE");

@@ -7,7 +7,13 @@ import { encodeSharePayload } from "@/core/share/codec";
 import { analyzeShareSize, buildShareUrl } from "@/core/share/url";
 import { buildPkpass } from "@/server/apple/pass";
 import { appUrl, appleWalletConfig } from "@/server/env";
-import { NO_STORE_HEADERS, errorJson, originAllowed, readJsonBody } from "@/server/http";
+import {
+  NO_STORE_HEADERS,
+  errorJson,
+  isJsonContentType,
+  originAllowed,
+  readJsonBody,
+} from "@/server/http";
 import { WALLET_REQUEST_MAX_BYTES, parseWalletRequest } from "@/server/walletRequest";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +22,7 @@ export async function POST(request: Request): Promise<Response> {
   const config = appleWalletConfig();
   if (config === null) return errorJson(503, "apple-wallet-not-configured");
   if (!originAllowed(request, appUrl())) return errorJson(403, "origin-not-allowed");
+  if (!isJsonContentType(request)) return errorJson(415, "unsupported-content-type");
 
   const body = await readJsonBody(request, WALLET_REQUEST_MAX_BYTES);
   if (body === null) return errorJson(400, "invalid-body");

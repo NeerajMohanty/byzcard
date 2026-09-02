@@ -13,39 +13,45 @@ export interface ShareQrState {
   size: ShareSize;
 }
 
+interface Computed {
+  key: string;
+  state: ShareQrState | null;
+  oversize: ShareSize | null;
+}
+
 /**
  * Derive the share URL, its QR symbol, and the size budget for a set of
- * card fields — all computed locally. Returns null while disabled, while
- * computing, or when the payload exceeds the hard budget (size still
- * reported via the second tuple slot for error display).
+ * card fields — all computed locally. `state` is null while disabled,
+ * while computing, or when the payload exceeds the hard budget (the size
+ * is then reported via `oversize` for error display).
  */
 export function useShareQr(fields: CardFields | null): {
   state: ShareQrState | null;
   oversize: ShareSize | null;
 } {
-  const [state, setState] = useState<ShareQrState | null>(null);
-  const [oversize, setOversize] = useState<ShareSize | null>(null);
+  const [computed, setComputed] = useState<Computed | null>(null);
 
+  // Value-keyed so equal field values never recompute (object identity of
+  // `fields` changes every editor keystroke).
   const key = fields === null ? null : JSON.stringify(fields);
+
   useEffect(() => {
+    if (fields === null || key === null) return;
     let cancelled = false;
-    if (fields === null || key === null) {
-      setState(null);
-      setOversize(null);
-      return;
-    }
     void (async () => {
       const fragment = await encodeSharePayload(fields);
       if (cancelled) return;
       const shareUrl = buildShareUrl(appOrigin(), fragment);
       const size = analyzeShareSize(shareUrl);
       if (size.level === "error") {
-        setState(null);
-        setOversize(size);
-        return;
+        setComputed({ key, state: null, oversize: size });
+      } else {
+        setComputed({
+          key,
+          state: { shareUrl, qr: encodeQrText(shareUrl, { ecl: "M" }), size },
+          oversize: null,
+        });
       }
-      setState({ shareUrl, qr: encodeQrText(shareUrl, { ecl: "M" }), size });
-      setOversize(null);
     })();
     return () => {
       cancelled = true;
@@ -53,5 +59,9 @@ export function useShareQr(fields: CardFields | null): {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- key captures fields by value
   }, [key]);
 
-  return { state, oversize };
+  // Results for a stale key are treated as "still computing".
+  if (key === null || computed === null || computed.key !== key) {
+    return { state: null, oversize: null };
+  }
+  return { state: computed.state, oversize: computed.oversize };
 }

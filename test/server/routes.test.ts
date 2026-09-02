@@ -124,6 +124,73 @@ describe("POST /api/apple-pass", () => {
     );
     expect(response.status).toBe(400);
   });
+
+  it("rejects non-JSON content types before reading the body", async () => {
+    configureApple();
+    const response = await applePost(
+      new Request("http://localhost:3000/api/apple-pass", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(VALID_BODY),
+      }),
+    );
+    expect(response.status).toBe(415);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+
+  it("rejects oversized bodies via the byte limit before any signing work", async () => {
+    configureApple();
+    const oversized = { ...VALID_BODY, photoBase64: "A".repeat(1_300_000) };
+    const response = await applePost(
+      postRequest("http://localhost:3000/api/apple-pass", oversized),
+    );
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "invalid-body" });
+  });
+
+  it("treats malformed credential environment values as unconfigured", async () => {
+    configureApple();
+    vi.stubEnv("APPLE_PASS_CERT_PEM_FILE", join(FIXTURES, "does-not-exist.pem"));
+    const response = await applePost(
+      postRequest("http://localhost:3000/api/apple-pass", VALID_BODY),
+    );
+    expect(response.status).toBe(503);
+  });
+
+  it("fails safely (500, no-store) when the Google key material is unusable", async () => {
+    configureGoogle();
+    vi.stubEnv("GOOGLE_WALLET_SA_KEY_PEM_FILE", join(FIXTURES, "README.md"));
+    const response = await googlePost(
+      postRequest("http://localhost:3000/api/google-pass", VALID_BODY),
+    );
+    expect(response.status).toBe(500);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(await response.json()).toEqual({ error: "jwt-build-failed" });
+  });
+
+  it("rejects an invalid Google object suffix (serial rules apply)", async () => {
+    configureGoogle();
+    const response = await googlePost(
+      postRequest("http://localhost:3000/api/google-pass", {
+        ...VALID_BODY,
+        serialNumber: "NOT-A-VALID-SUFFIX!",
+      }),
+    );
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "invalid-serial" });
+  });
+
+  it("Google endpoint also rejects non-JSON content types", async () => {
+    configureGoogle();
+    const response = await googlePost(
+      new Request("http://localhost:3000/api/google-pass", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "a=b",
+      }),
+    );
+    expect(response.status).toBe(415);
+  });
 });
 
 describe("POST /api/google-pass", () => {

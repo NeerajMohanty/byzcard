@@ -141,12 +141,19 @@ registration web service — those would require server state.
 
 ## Google Wallet
 
-`POST /api/google-pass`: validate → build a **self-contained ("fat") JWT**
-embedding the GenericClass + GenericObject (title, name, role, text
-modules, links, QR barcode) → RS256-sign with the service-account key via
-`node:crypto` → return `https://pay.google.com/gp/v/save/<jwt>` → discard.
-Google creates the class/object when the user saves; BYZCARD makes zero
-Google API calls and keeps zero state.
+Class lifecycle follows Google's production pattern: the BYZCARD
+GenericClass (`{issuerId}.byzcard_v1`) is created **once** by the operator
+via `npm run wallet:google:setup` (a self-contained Node tool — service
+account JWT-bearer auth + the Wallet REST API, no SDK; idempotent, treats
+an existing matching class as success). Normal issuance then makes zero
+Google API calls:
+
+`POST /api/google-pass`: validate → build a save JWT containing **only a
+GenericObject** (title, name, role, text modules, links, QR barcode)
+referencing the pre-created `classId` → RS256-sign with the
+service-account key via `node:crypto` → return
+`https://pay.google.com/gp/v/save/<jwt>` → discard. No class is ever
+(re)created per user, and BYZCARD keeps zero state.
 
 **No photo on the Google pass**: Google Wallet images must be fetched by
 Google from hosted HTTPS URLs (data URIs unsupported; "secure private

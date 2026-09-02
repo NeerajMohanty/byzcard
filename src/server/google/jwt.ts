@@ -1,8 +1,11 @@
 /**
  * Google Wallet Generic Pass "save" JWT, server-only.
- * Uses the self-contained ("fat") JWT form: the GenericClass and
- * GenericObject are embedded in the signed token and created by Google when
- * the user saves — BYZCARD makes no Google API calls and stores nothing.
+ *
+ * Production lifecycle (per Google's documented pattern): the BYZCARD
+ * GenericClass is created ONCE by the operator (`npm run wallet:google:setup`);
+ * every user save JWT then contains only a GenericObject referencing that
+ * pre-created class. Normal issuance makes zero Google API calls and stores
+ * nothing.
  *
  * Signing is RS256 via Node's built-in crypto (no dependencies).
  * The professional photo is intentionally absent: Google Wallet images must
@@ -13,7 +16,14 @@ import { createSign } from "node:crypto";
 import { displayUrl, type CardFields } from "@/core/card/types";
 import type { GoogleWalletConfig } from "../env";
 
-const CLASS_SUFFIX = "byzcard_v1";
+/** Class identifier suffix — must match the operator setup tool. */
+export const GOOGLE_CLASS_SUFFIX = "byzcard_v1";
+
+/** Fully qualified GenericClass id for an issuer. */
+export function googleClassId(issuerId: string): string {
+  return `${issuerId}.${GOOGLE_CLASS_SUFFIX}`;
+}
+
 const HEX_BACKGROUND = "#0b1220";
 
 export interface GooglePassInput {
@@ -59,7 +69,7 @@ function buildGenericObject(input: GooglePassInput): Record<string, unknown> {
   }
   return {
     id: `${config.issuerId}.${input.objectSuffix}`,
-    classId: `${config.issuerId}.${CLASS_SUFFIX}`,
+    classId: googleClassId(config.issuerId),
     state: "ACTIVE",
     hexBackgroundColor: HEX_BACKGROUND,
     cardTitle: localized("BYZCARD"),
@@ -85,7 +95,9 @@ export function buildGoogleSaveUrl(input: GooglePassInput): string {
     iat: Math.floor(Date.now() / 1000),
     origins: [input.appOrigin],
     payload: {
-      genericClasses: [{ id: `${input.config.issuerId}.${CLASS_SUFFIX}` }],
+      // Object only — the class is pre-created once by the operator setup
+      // tool, per Google's production guidance. No class is (re)created
+      // per user save.
       genericObjects: [buildGenericObject(input)],
     },
   };

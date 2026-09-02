@@ -57,15 +57,24 @@ describe("Google Wallet save JWT", () => {
     expect(payload.origins).toEqual(["https://byzcard.example"]);
   });
 
-  it("embeds a self-contained class + object (fat JWT, no REST calls)", () => {
+  it("carries only a GenericObject referencing the pre-created class (production lifecycle)", () => {
     const jwt = buildUrl().slice("https://pay.google.com/gp/v/save/".length);
     const payload = b64urlToJson(jwt.split(".")[1] ?? "");
     const inner = payload.payload as {
-      genericClasses: { id: string }[];
+      genericClasses?: unknown;
       genericObjects: Record<string, unknown>[];
     };
-    expect(inner.genericClasses[0]?.id).toBe("3388000000000000000.byzcard_v1");
+    // The class is created once by the operator setup tool — never per save.
+    expect(inner.genericClasses).toBeUndefined();
+    expect(inner.genericObjects).toHaveLength(1);
     const obj = inner.genericObjects[0] ?? {};
+    expect(obj.state).toBe("ACTIVE");
+    const cardTitle = obj.cardTitle as { defaultValue: { value: string } };
+    const header = obj.header as { defaultValue: { value: string } };
+    const subheader = obj.subheader as { defaultValue: { value: string } };
+    expect(cardTitle.defaultValue.value).toBe("BYZCARD");
+    expect(header.defaultValue.value).toBe("Ada Lovelace");
+    expect(subheader.defaultValue.value).toBe("Chief Analyst");
     expect(obj.id).toBe("3388000000000000000.abcdef0123456789");
     expect(obj.classId).toBe("3388000000000000000.byzcard_v1");
     const barcode = obj.barcode as { type: string; value: string };

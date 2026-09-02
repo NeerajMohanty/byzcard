@@ -46,6 +46,17 @@ Notes:
 2. Create a **GCP service account**, grant it access in the Wallet
    Console, enable the Google Wallet API, and download its key; extract
    the private key PEM and client email.
+3. Set the environment variables below, then run the **one-time class
+   setup**:
+
+   ```sh
+   npm run wallet:google:setup
+   ```
+
+   This creates the `{issuerId}.byzcard_v1` GenericClass (Google's
+   production pattern: class once, objects per save). It is idempotent —
+   an already existing matching class is success — and prints no secrets.
+   Re-run it any time; it stores nothing.
 
 Set:
 
@@ -57,14 +68,38 @@ GOOGLE_WALLET_SA_KEY_PEM_FILE=/secrets/google-sa-key.pem
 
 Notes:
 
-- BYZCARD uses the self-contained JWT flow: the class and object are
-  embedded in the signed token and created when the user saves. No REST
-  calls, no state.
+- User issuance is stateless: each save JWT carries only the
+  GenericObject referencing the pre-created class. No REST calls during
+  normal use, no state.
 - `NEXT_PUBLIC_APP_URL` must be the exact origin serving BYZCARD — it is
   placed in the JWT `origins` claim and Google rejects saves from other
   origins.
 - The pass carries no photo by design (Google requires hosted image URLs,
   which the zero-storage architecture forbids).
+
+## Apple real-device validation checklist (final production gate)
+
+The signer's cryptographic structure is verified against OpenSSL in the
+test suite, but Apple Wallet is **not production-verified** until a pass
+signed with an Apple-issued certificate is accepted on a physical iPhone.
+When credentials exist, run through:
+
+1. Apple Developer membership active.
+2. Pass Type ID registered.
+3. Pass Type certificate issued for that ID.
+4. Private key exported alongside it.
+5. Current WWDR intermediate certificate downloaded.
+6. Production environment variables set (see above).
+7. App served from the HTTPS production origin (`NEXT_PUBLIC_APP_URL`).
+8. Create a real card on the iPhone (with photo).
+9. Tap **Add to Apple Wallet** — the pass preview must open and add.
+10. Verify the visual layout: company top right, role + name left, photo
+    thumbnail right, phone/email, QR.
+11. Scan the pass QR with a second phone — the recipient card must open.
+12. Edit the local card (change the role).
+13. Tap **Update Apple Wallet pass**.
+14. Verify Wallet replaced the pass in place (same serial) with the new
+    content.
 
 ## Rotation and custody
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { checkNdefFit, NFC_TAG_BUDGETS } from "@/core/ndef/build";
 import { webNfcSupported, writeNfcUrl, type NfcWriteOutcome } from "@/adapters/nfc/webNfc";
 import { isIos } from "@/lib/platform";
+import { useClientValue } from "@/lib/useClientValue";
 
 interface NfcPanelProps {
   shareLink: string | null;
@@ -17,15 +18,10 @@ const OUTCOME_MESSAGES: Record<Exclude<NfcWriteOutcome, "written">, string> = {
 };
 
 export function NfcPanel({ shareLink }: NfcPanelProps) {
-  const [supported, setSupported] = useState<boolean | null>(null);
-  const [ios, setIos] = useState(false);
+  const supported = useClientValue<boolean | null>(webNfcSupported, null);
+  const ios = useClientValue(isIos, false);
   const [state, setState] = useState<"idle" | "writing" | "written" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    setSupported(webNfcSupported());
-    setIos(isIos());
-  }, []);
 
   if (supported === null || shareLink === null) return null;
 

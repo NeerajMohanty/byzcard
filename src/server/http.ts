@@ -35,6 +35,12 @@ export function originAllowed(request: Request, configuredAppUrl: string): boole
   }
 }
 
+/** Cheap pre-parse gate: the endpoints accept only JSON bodies. */
+export function isJsonContentType(request: Request): boolean {
+  const type = request.headers.get("content-type") ?? "";
+  return type.split(";")[0]?.trim().toLowerCase() === "application/json";
+}
+
 /** Read a JSON body with a hard byte limit. Returns null when invalid. */
 export async function readJsonBody(request: Request, maxBytes: number): Promise<unknown | null> {
   const lengthHeader = request.headers.get("content-length");

@@ -54,3 +54,44 @@ layer.
 
 Run `npm run wallet:google:setup` once per issuer before enabling Google
 Wallet (see `docs/WALLET_SETUP.md`).
+
+## 6. Vercel specifics
+
+Vercel needs no repository configuration: the Next.js framework preset is
+auto-detected, `next build` is the build command, and the security headers
+ship from `next.config.ts` — there is intentionally no `vercel.json`.
+`npx vercel` deploys the local directory as a preview (and
+`npx vercel --prod` to production) without requiring a git remote.
+
+Environment variables (Project → Settings → Environment Variables):
+
+- **Production**: `NEXT_PUBLIC_APP_URL=https://byzcard.cc` — the exact
+  public origin: `https`, no path. (Trailing slashes are tolerated by the
+  code, but set it clean.)
+- **Preview**: leave `NEXT_PUBLIC_APP_URL` unset. Share URLs and QR codes
+  fall back to the live preview origin in the browser; only the
+  canonical/OpenGraph metadata falls back to localhost, which is cosmetic
+  because Vercel serves previews with `X-Robots-Tag: noindex`.
+- `NEXT_PUBLIC_*` values are inlined at **build time** — changing one
+  requires a redeploy, not just a restart.
+- Wallet credentials on Vercel must use the inline `*_PEM` variables
+  (multi-line values are supported; `\n`-escaped single lines also work).
+  The `*_PEM_FILE` variants are for self-hosted filesystems only.
+- If Google Wallet is enabled in **any** environment, that environment
+  must have `NEXT_PUBLIC_APP_URL` set to its exact origin — the JWT
+  `origins` claim and the endpoint origin allow-list both derive from it.
+
+Operational settings:
+
+- **Firewall (REQUIRED before enabling Wallet in production)**: Project →
+  Firewall → Custom Rules — two rules with the **Rate Limit** action
+  (available on Pro and above): `POST` + path `/api/apple-pass` and
+  `POST` + path `/api/google-pass`, each ~10 requests per 60 s per IP,
+  excess answered with 429. Rate-limit nothing else.
+- **Deployment Protection**: previews are login-gated by default. To test
+  a preview on a phone, use the deployment's shareable link or relax
+  protection for that deployment.
+- **Analytics**: leave Vercel Web Analytics and Speed Insights off —
+  BYZCARD ships no analytics or tracking.
+- **Log drains**: do not attach any drain or integration that records
+  request bodies (see section 4).

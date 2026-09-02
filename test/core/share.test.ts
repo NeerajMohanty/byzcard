@@ -37,6 +37,8 @@ describe("SharePayloadV1 codec", () => {
     if (decoded.ok) {
       expect(decoded.payload.website).toBeUndefined();
       expect(decoded.payload.linkedin).toBeUndefined();
+      // The owner-card em dash is presentation-only and must never leak.
+      expect(JSON.stringify(decoded.payload)).not.toContain("—");
     }
   });
 

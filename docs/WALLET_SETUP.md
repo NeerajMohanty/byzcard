@@ -6,6 +6,12 @@ environment variables (inline PEM with `\n` escapes, or `*_FILE` paths).
 
 ## Apple Wallet
 
+> Only the deployment operator/self-hoster needs these credentials, and
+> only to enable the optional Apple Wallet button. Normal BYZCARD users
+> never need an Apple Developer account — the core product (Home Screen
+> install, QR, vCard, print, offline, backup) is fully independent of
+> Apple Wallet.
+
 Requirements (all from Apple; BYZCARD cannot remove any of them):
 
 1. **Apple Developer Program** membership (paid, currently US$99/year).

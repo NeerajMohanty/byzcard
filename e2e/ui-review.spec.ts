@@ -11,6 +11,8 @@ const DIR = "artifacts/ui-review";
 
 test.skip(({ isMobile }) => !isMobile, "UI review screenshots are captured at phone size only");
 
+const cardArticle = (page: Page) => page.getByRole("article", { name: "Business card preview" });
+
 async function captureLanding(page: Page, shot: (name: string) => string): Promise<void> {
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Create your card" })).toBeVisible();
@@ -30,17 +32,13 @@ async function captureEditorAndCard(page: Page, shot: (name: string) => string):
   await fillCardForm(page, true);
   await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
   await page.screenshot({ path: shot("03-create-filled"), fullPage: true });
-  await page
-    .getByRole("article", { name: "Business card preview" })
-    .screenshot({ path: shot("04-live-preview-card") });
+  await cardArticle(page).screenshot({ path: shot("04-live-preview-card") });
 
   await page.getByRole("button", { name: "Save card" }).click();
   await page.waitForURL("**/card");
   await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
   await page.screenshot({ path: shot("05-card-screen"), fullPage: true });
-  await page
-    .getByRole("article", { name: "Business card preview" })
-    .screenshot({ path: shot("06-card-hero") });
+  await cardArticle(page).screenshot({ path: shot("06-card-hero") });
 }
 
 async function captureRecipient(page: Page, shot: (name: string) => string): Promise<void> {
@@ -49,26 +47,67 @@ async function captureRecipient(page: Page, shot: (name: string) => string): Pro
   await page.goto(shareUrl ?? "");
   await expect(page.getByRole("heading", { name: TEST_CARD.fullName })).toBeVisible();
   await page.screenshot({ path: shot("07-recipient"), fullPage: true });
+  await page.goto("/card");
 }
 
-async function captureInitialsCard(page: Page, shot: (name: string) => string): Promise<void> {
+async function captureInstallUi(
+  page: Page,
+  shot: (name: string) => string,
+  browserName: string,
+): Promise<void> {
+  const cta = page.getByRole("button", { name: "Add BYZCARD to Home Screen" });
+  await expect(cta).toBeVisible();
+  if (browserName === "webkit") {
+    // iPhone Safari: manual instruction sheet.
+    await cta.click();
+    const sheet = page.getByRole("dialog", { name: /Add BYZCARD to your Home Screen/u });
+    await expect(sheet).toBeVisible();
+    await page.screenshot({ path: shot("09-ios-install-sheet") });
+    await sheet.getByRole("button", { name: "Got it" }).click();
+  } else {
+    // Chromium: the install CTA block.
+    await cta.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: shot("09-install-cta") });
+  }
+}
+
+async function capturePrintPreviews(page: Page, shot: (name: string) => string): Promise<void> {
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator("[data-print-format='cr80']")).toBeVisible();
+  await page.locator("[data-print-format='cr80']").screenshot({ path: shot("10-print-cr80") });
+  await page.emulateMedia({ media: "screen" });
+  await page.getByRole("radio", { name: /Event Badge/u }).check();
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator("[data-print-format='badge']")).toBeVisible();
+  await page.locator("[data-print-format='badge']").screenshot({ path: shot("11-print-badge") });
+  await page.emulateMedia({ media: "screen" });
+}
+
+async function captureVariants(page: Page, shot: (name: string) => string): Promise<void> {
   page.on("dialog", (dialog) => void dialog.accept());
+  // Initials (no photo) variant.
   await page.goto("/card");
   await page.getByRole("button", { name: /Delete card/u }).click();
   await page.waitForURL(/\/$/u);
   await createCard(page, false);
   await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
-  await page
-    .getByRole("article", { name: "Business card preview" })
-    .screenshot({ path: shot("08-card-initials") });
+  await cardArticle(page).screenshot({ path: shot("08-card-initials") });
+  // Blank-website variant (photo, no website → WEBSITE + em dash).
+  await page.getByRole("button", { name: /Delete card/u }).click();
+  await page.waitForURL(/\/$/u);
+  await createCard(page, true, false);
+  await expect(cardArticle(page).getByText("—")).toBeVisible();
+  await cardArticle(page).screenshot({ path: shot("12-card-hero-no-website") });
 }
 
-test("capture UI review screenshots", async ({ page }, testInfo) => {
+test("capture UI review screenshots", async ({ page, browserName }, testInfo) => {
   mkdirSync(DIR, { recursive: true });
   const shot = (name: string): string => `${DIR}/${testInfo.project.name}-${name}.png`;
   await captureLanding(page, shot);
   await captureValidationErrors(page, shot);
   await captureEditorAndCard(page, shot);
   await captureRecipient(page, shot);
-  await captureInitialsCard(page, shot);
+  await captureInstallUi(page, shot, browserName);
+  await capturePrintPreviews(page, shot);
+  await captureVariants(page, shot);
 });

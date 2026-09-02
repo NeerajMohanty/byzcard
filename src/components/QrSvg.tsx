@@ -5,13 +5,15 @@ interface QrSvgProps {
   symbol: QrSymbol;
   /** Accessible description of what the code contains. */
   label: string;
+  /** White-tile padding in px — the quiet zone. Print layouts size it up. */
+  padding?: number;
 }
 
 /**
  * Crisp SVG rendering of a QR symbol on a white tile.
  * The white padding provides the required quiet zone.
  */
-export function QrSvg({ symbol, label }: QrSvgProps) {
+export function QrSvg({ symbol, label, padding = 10 }: QrSvgProps) {
   return (
     <div
       role="img"
@@ -19,7 +21,7 @@ export function QrSvg({ symbol, label }: QrSvgProps) {
       style={{
         background: "#ffffff",
         borderRadius: 12,
-        padding: 10,
+        padding,
         lineHeight: 0,
         display: "inline-block",
       }}

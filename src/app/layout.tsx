@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   description:
     "Create a digital business card that lives on your phone. No account, no database — share it from your Wallet with a QR code.",
   applicationName: "BYZCARD",
+  appleWebApp: {
+    capable: true,
+    title: "BYZCARD",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {

@@ -187,3 +187,32 @@ input {
     transition: none !important;
   }
 }
+
+/* ── Printing ─────────────────────────────────────────────────────────
+   Print-only roots stay hidden on screen; when printing, the screen UI
+   disappears and the page frame collapses so the physical @page size of
+   the selected format is exact. */
+.printOnly {
+  display: none;
+}
+
+@media print {
+  .printOnly {
+    display: block;
+  }
+
+  .screenOnly {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #ffffff;
+  }
+
+  main {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+}

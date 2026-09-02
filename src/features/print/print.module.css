@@ -1,0 +1,158 @@
+/*
+ * Physical print layouts. All dimensions in CSS physical units
+ * (1in = 96 CSS px). Backgrounds are forced with print-color-adjust so
+ * the dark card prints as designed.
+ */
+
+/* ── Standard ID Card — CR80, 3.375 × 2.125 in, landscape ── */
+
+.cr80 {
+  width: 3.375in;
+  height: 2.125in;
+  box-sizing: border-box;
+  background: #0b1220;
+  color: #f4f6fb;
+  display: flex;
+  gap: 0.14in;
+  padding: 0.16in 0.18in;
+  overflow: hidden;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.cr80Left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cr80Right {
+  width: 1.05in;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.printLabel {
+  font-size: 4.5pt;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7c8aa5;
+  margin: 0;
+}
+
+.cr80Role {
+  font-size: 5.5pt;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0 0 0.02in;
+}
+
+.cr80Name {
+  font-size: 13pt;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.cr80Company {
+  font-size: 7pt;
+  font-weight: 600;
+  margin: 0.03in 0 0;
+}
+
+.cr80Contact {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.045in;
+}
+
+.cr80Value {
+  font-size: 6.5pt;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.cr80Brand {
+  font-size: 4.5pt;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #7c8aa5;
+  margin: 0.06in 0 0;
+}
+
+.cr80Qr {
+  width: 0.95in;
+}
+
+/* ── Event Badge — 4 × 6 in, portrait ── */
+
+.badge {
+  width: 4in;
+  height: 6in;
+  box-sizing: border-box;
+  background: #0b1220;
+  color: #f4f6fb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0.35in 0.4in 0.28in;
+  overflow: hidden;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.badgeBrandTop {
+  font-size: 7pt;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: #7c8aa5;
+  margin: 0 0 0.16in;
+}
+
+.badgeName {
+  font-size: 25pt;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0.24in 0 0;
+  overflow-wrap: anywhere;
+}
+
+.badgeRole {
+  font-size: 12pt;
+  color: #94a3b8;
+  margin: 0.08in 0 0;
+}
+
+.badgeCompany {
+  font-size: 14pt;
+  font-weight: 600;
+  margin: 0.05in 0 0;
+}
+
+.badgeQr {
+  width: 1.9in;
+  margin-top: auto;
+  padding-top: 0.16in;
+}
+
+.badgeScan {
+  font-size: 11pt;
+  color: #94a3b8;
+  margin: 0.14in 0 auto;
+}
+
+/* Square QR guarantee in both layouts. */
+.cr80Qr,
+.badgeQr {
+  aspect-ratio: 1 / 1;
+}

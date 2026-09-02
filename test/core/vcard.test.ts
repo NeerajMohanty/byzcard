@@ -53,6 +53,7 @@ describe("vCard 3.0 builder", () => {
     const vcard = buildVcard({ ...FIELDS, website: undefined, linkedin: undefined });
     expect(vcard).not.toContain("URL:");
     expect(vcard).not.toContain("X-ABLabel");
+    expect(vcard).not.toContain("—"); // presentation-only em dash never exported
   });
 
   it("embeds a photo folded to 75-octet lines", () => {

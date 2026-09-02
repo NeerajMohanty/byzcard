@@ -36,7 +36,7 @@ export function CardView({ fields, photoUrl, qr }: CardViewProps) {
   return (
     <article className={styles.card} aria-label="Business card preview">
       <header className={styles.header}>
-        <div>
+        <div className={styles.headerStack}>
           <p className={styles.label}>Company</p>
           <p className={styles.companyName}>
             {fields.company === "" ? (
@@ -59,7 +59,7 @@ export function CardView({ fields, photoUrl, qr }: CardViewProps) {
             )}
           </h2>
         </div>
-        <Avatar fullName={fields.fullName} photoUrl={photoUrl} size={72} />
+        <Avatar fullName={fields.fullName} photoUrl={photoUrl} size={96} />
       </div>
 
       <div className={styles.contact}>
@@ -71,12 +71,18 @@ export function CardView({ fields, photoUrl, qr }: CardViewProps) {
           <p className={styles.label}>Email</p>
           <Value value={fields.email} placeholder="you@example.com" />
         </div>
-        {website !== null && (
-          <div>
-            <p className={styles.label}>Website</p>
+        <div>
+          <p className={styles.label}>Website</p>
+          {website !== null ? (
             <Value value={displayUrl(website)} placeholder="" />
-          </div>
-        )}
+          ) : (
+            // Presentation-only placeholder: the em dash exists purely in
+            // this view and is never stored, shared, or exported.
+            <p className={styles.contactValue} aria-label="No website provided">
+              —
+            </p>
+          )}
+        </div>
       </div>
 
       {qr !== null && (

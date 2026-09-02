@@ -4,49 +4,19 @@
  * Wallet fixtures configured, across phone / large-phone / desktop
  * viewports. Console errors and page errors fail the tests.
  */
-import { expect, test, type ConsoleMessage, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { createCard } from "./helpers";
+import { createCard, makeConsoleGuard } from "./helpers";
 
-const consoleErrors: string[] = [];
-/** Patterns allowed for a single test (e.g. expected offline fetch noise). */
-let allowedPatterns: RegExp[] = [];
-/**
- * Always-allowed browser advisories that are not application errors:
- * WebKit warns about Next.js's CSS <link rel=preload> optimization when a
- * page settles faster than the preload heuristic expects.
- */
-const BASE_ALLOWED: RegExp[] = [
-  /was preloaded using link preload but not used within/u,
-  // WebKit unconditionally logs a navigation-aborted fetch even when the
-  // application handles the rejection. Scoped to the credential-free
-  // config ping only.
-  /wallet-config.*(access control checks|aborted|cancelled)/u,
-];
-
-function watchConsole(page: Page): void {
-  page.on("console", (message: ConsoleMessage) => {
-    if (message.type() === "error" || message.type() === "warning") {
-      consoleErrors.push(`[${message.type()}] ${message.text()}`);
-    }
-  });
-  page.on("pageerror", (error) => {
-    consoleErrors.push(`[pageerror] ${error.message}`);
-  });
-}
+const guard = makeConsoleGuard();
 
 test.beforeEach(({ page }) => {
-  consoleErrors.length = 0;
-  allowedPatterns = [];
-  watchConsole(page);
+  guard.reset();
+  guard.watch(page);
 });
 
 test.afterEach(() => {
-  const allowed = [...BASE_ALLOWED, ...allowedPatterns];
-  const unexpected = consoleErrors.filter(
-    (entry) => !allowed.some((pattern) => pattern.test(entry)),
-  );
-  expect(unexpected, "browser console must be clean").toEqual([]);
+  guard.assertClean();
 });
 
 test("landing page renders the pitch and a real example card", async ({ page }) => {
@@ -83,7 +53,10 @@ test("create → live preview → save → persist across reload → edit", asyn
   await page.getByRole("button", { name: "Save card" }).click();
   await page.waitForURL("**/card");
   await page.reload();
-  await expect(page.getByText("Director of Research")).toBeVisible();
+  // Scope to the visible card — the hidden print sheet repeats the role.
+  await expect(
+    page.getByRole("article", { name: "Business card preview" }).getByText("Director of Research"),
+  ).toBeVisible();
 });
 
 test("QR share URL opens the recipient card with no photo fetch and no card request", async ({
@@ -99,7 +72,7 @@ test("QR share URL opens the recipient card with no photo fetch and no card requ
   // Open in a fresh page and record every request: the fragment must never
   // be sent, and no image may be fetched.
   const recipient = await context.newPage();
-  watchConsole(recipient);
+  guard.watch(recipient);
   const requests: string[] = [];
   recipient.on("request", (request) => requests.push(request.url()));
   await recipient.goto(shareUrl ?? "");
@@ -276,7 +249,7 @@ test("core app works offline after first load (no PWA install)", async ({
 
   // Failed network fetches while offline are expected and logged by the
   // browser itself; everything else must stay clean.
-  allowedPatterns = [/Failed to load resource/u, /net::ERR/u, /Failed to fetch/u];
+  guard.allow.push(/Failed to load resource/u, /net::ERR/u, /Failed to fetch/u);
   await context.setOffline(true);
   await page.reload();
 

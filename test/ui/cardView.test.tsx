@@ -35,9 +35,33 @@ describe("CardView", () => {
     expect(img.getAttribute("src")).toBe("blob:fake");
   });
 
-  it("omits the website row when absent", () => {
+  it("keeps the WEBSITE row with a presentation-only em dash when absent", () => {
     render(<CardView fields={{ ...FIELDS, website: undefined }} photoUrl={null} qr={null} />);
-    expect(screen.queryByText("Website")).toBeNull();
+    expect(screen.getByText("Website")).toBeDefined();
+    const dash = screen.getByText("—");
+    expect(dash.getAttribute("aria-label")).toBe("No website provided");
+  });
+
+  it("renders the photo and initials avatar at the approved 96px card size", () => {
+    const { container, rerender } = render(
+      <CardView fields={FIELDS} photoUrl="blob:fake" qr={null} />,
+    );
+    const img = screen.getByAltText("Photo of Ada Lovelace");
+    expect(img.getAttribute("width")).toBe("96");
+    expect(img.getAttribute("height")).toBe("96");
+    rerender(<CardView fields={FIELDS} photoUrl={null} qr={null} />);
+    const initials = screen.getByText("AL");
+    expect(initials.style.width).toBe("96px");
+    expect(initials.style.borderRadius).toBe("50%");
+    expect(container.querySelector("img")).toBeNull();
+  });
+
+  it("keeps the company label and value in one right-aligned stack", () => {
+    const { container } = render(<CardView fields={FIELDS} photoUrl={null} qr={null} />);
+    const stack = container.querySelector("[class*='headerStack']");
+    expect(stack).not.toBeNull();
+    expect(stack?.textContent).toContain("Company");
+    expect(stack?.textContent).toContain("Analytical Engines");
   });
 
   it("renders placeholders while fields are empty (live preview)", () => {

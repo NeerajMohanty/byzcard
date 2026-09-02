@@ -3,12 +3,24 @@
 A mobile-first digital business card that lives on your phone.
 
 - Card creation, editing, photo processing, QR generation, vCard generation,
-  NFC payload generation, backup export/import, and offline use all happen
-  **in the browser, on the device**.
+  NFC payload generation, backup export/import, printing, and offline use
+  all happen **in the browser, on the device**.
+- **Home Screen installation is the primary quick-access mechanism**: add
+  BYZCARD to the Home Screen and the icon opens straight to your card and
+  its QR — free, offline-capable, no Apple Developer account involved.
+- **Printing is first-class and fully local**: two V1 formats — Standard
+  ID Card (CR80, 3.375 × 2.125 in) and Event Badge (4 × 6 in) — via the
+  browser print dialog, which also provides Save as PDF. Print at
+  100% / Actual size. (Possible future work: batch badge generation from a
+  local CSV — not implemented.)
 - BYZCARD has **no accounts, no database, and no server-side card storage**.
 - The only server functionality is a pair of **stateless Wallet signing
   endpoints** (Apple / Google), which process a request in memory and retain
   nothing. Both are optional — without credentials the whole core still works.
+- **Apple note**: only a deployment operator/self-hoster who wants the
+  optional Apple Wallet feature needs Apple credentials. Normal BYZCARD
+  users never need an Apple Developer account; core BYZCARD does not
+  depend on Apple Wallet.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full technical
 design, [docs/WALLET_SETUP.md](docs/WALLET_SETUP.md) for Wallet credential

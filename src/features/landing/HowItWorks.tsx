@@ -29,15 +29,18 @@ export function HowItWorks() {
     <section id="how-it-works" className={`${styles.section} ${styles.anchorTarget}`}>
       <div className={styles.container}>
         <div className={styles.sectionHead}>
+          <p className={styles.sectionEyebrow}>How it works</p>
           <h2 className={styles.sectionTitle}>Meet. Scan. Save.</h2>
           <p className={styles.lede}>Sharing your card should take seconds.</p>
         </div>
-        <div className={styles.steps}>
+        <div className={styles.stepsFlow}>
           {STEPS.map((step) => (
-            <div key={step.num} className={styles.step}>
-              <p className={styles.stepNum}>STEP {step.num}</p>
-              <h3 className={styles.stepTitle}>{step.title}</h3>
-              <p className={styles.stepCopy}>{step.copy}</p>
+            <div key={step.num}>
+              <p className={styles.stepGhost} aria-hidden="true">
+                {step.num}
+              </p>
+              <h3 className={styles.itemTitle}>{step.title}</h3>
+              <p className={styles.itemCopy}>{step.copy}</p>
             </div>
           ))}
         </div>

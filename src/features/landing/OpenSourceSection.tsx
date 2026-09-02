@@ -13,18 +13,17 @@ export function OpenSourceSection({ github }: OpenSourceSectionProps) {
       className={`${styles.section} ${styles.sectionAlt} ${styles.anchorTarget}`}
     >
       <div className={styles.container}>
-        <div className={styles.sectionHead}>
+        <div className={styles.sectionHead} style={{ marginBottom: 24 }}>
+          <p className={styles.sectionEyebrow}>Open source</p>
           <h2 className={styles.sectionTitle}>Open by design.</h2>
           <p className={styles.lede}>
             BYZCARD is being built as an open-source project. Inspect it. Self-host it. Improve it.
             Make it your own.
           </p>
         </div>
-        <ul className={styles.trustStrip} style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <ul className={styles.inlineList}>
           {POINTS.map((point) => (
-            <li key={point} className={styles.trustCell}>
-              {point}
-            </li>
+            <li key={point}>{point}</li>
           ))}
         </ul>
         {github !== null && (

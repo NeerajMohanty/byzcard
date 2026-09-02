@@ -65,6 +65,18 @@ describe("marketing homepage", () => {
     expect(container.textContent).toContain("only when you intentionally use a sharing feature");
   });
 
+  it("privacy comparison shows both journeys with the architectural punchline", () => {
+    const { container } = renderLanding();
+    expect(screen.getByText("Typical hosted digital card")).toBeDefined();
+    const lanes = container.querySelectorAll("ol[class*=laneList]");
+    expect(lanes).toHaveLength(2);
+    expect(lanes[0]?.children).toHaveLength(4);
+    expect(lanes[1]?.children).toHaveLength(4);
+    expect(lanes[0]?.textContent).toContain("Recipient loads it from the service");
+    expect(lanes[1]?.textContent).toContain("Recipient opens the shared card");
+    expect(container.textContent).toContain("no service in the middle");
+  });
+
   it("contains no fabricated social proof or statistics", () => {
     const { container } = renderLanding();
     expect(container.textContent).not.toMatch(/trusted by|testimonial|★|Join thousands/iu);

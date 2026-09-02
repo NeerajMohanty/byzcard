@@ -8,6 +8,7 @@ export function PrintSection() {
       <div className={`${styles.container} ${styles.printGrid}`}>
         <div>
           <div className={styles.sectionHead} style={{ marginBottom: 0 }}>
+            <p className={styles.sectionEyebrow}>Print</p>
             <h2 className={styles.sectionTitle}>
               Digital when you want it.
               <br />
@@ -17,20 +18,20 @@ export function PrintSection() {
               Print your BYZCARD directly from your browser. No print service. No upload required.
             </p>
           </div>
-          <div className={styles.printFormats}>
-            <div className={styles.featureCard}>
-              <p className={styles.featureKicker}>Standard ID Card</p>
-              <h3 className={styles.featureTitle}>CR80 · 3.375 × 2.125 in</h3>
-              <p className={styles.featureCopy}>Wallet-sized.</p>
+          <dl className={styles.specList}>
+            <div className={styles.specRow}>
+              <dt className={styles.specName}>Standard ID Card</dt>
+              <dd className={styles.specDims}>CR80 · 3.375 × 2.125 in</dd>
+              <dd className={styles.specNote}>Wallet-sized.</dd>
             </div>
-            <div className={styles.featureCard}>
-              <p className={styles.featureKicker}>Event Badge</p>
-              <h3 className={styles.featureTitle}>4 × 6 in</h3>
-              <p className={styles.featureCopy}>
+            <div className={styles.specRow}>
+              <dt className={styles.specName}>Event Badge</dt>
+              <dd className={styles.specDims}>4 × 6 in</dd>
+              <dd className={styles.specNote}>
                 Designed for networking events, conferences and recruiting events.
-              </p>
+              </dd>
             </div>
-          </div>
+          </dl>
           <Link href="/create" className={`btn btn-primary ${styles.btnInline}`}>
             Create a card to print
           </Link>

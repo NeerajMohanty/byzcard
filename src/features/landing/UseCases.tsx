@@ -23,13 +23,14 @@ export function UseCases() {
     <section className={`${styles.section} ${styles.sectionAlt}`}>
       <div className={styles.container}>
         <div className={styles.sectionHead}>
+          <p className={styles.sectionEyebrow}>Who it’s for</p>
           <h2 className={styles.sectionTitle}>Made for whoever you’re meeting next.</h2>
         </div>
-        <div className={styles.featureGrid}>
+        <div className={styles.caseList}>
           {CASES.map((useCase) => (
-            <div key={useCase.title} className={styles.featureCard}>
-              <h3 className={styles.featureTitle}>{useCase.title}</h3>
-              <p className={styles.featureCopy}>{useCase.copy}</p>
+            <div key={useCase.title} className={styles.caseItem}>
+              <h3 className={styles.itemTitle}>{useCase.title}</h3>
+              <p className={styles.itemCopy}>{useCase.copy}</p>
             </div>
           ))}
         </div>

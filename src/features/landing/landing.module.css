@@ -163,7 +163,16 @@
 
 .sectionHead {
   max-width: 680px;
-  margin-bottom: 40px;
+  margin-bottom: 44px;
+}
+
+.sectionEyebrow {
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--label);
+  margin: 0 0 14px;
 }
 
 .sectionTitle {
@@ -186,99 +195,77 @@
   }
 }
 
-/* ── Trust strip ── */
-
-.trustStrip {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  border: 1px solid var(--card-edge);
-  border-radius: 16px;
-  overflow: hidden;
+/* Shared item typography (borderless treatments). */
+.itemTitle {
+  font-size: 17px;
+  margin: 0 0 6px;
 }
 
-.trustCell {
-  padding: 18px 16px;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  border: 0 solid var(--card-edge);
-}
-
-.trustCell:nth-child(odd) {
-  border-right-width: 1px;
-}
-
-.trustCell:nth-child(-n + 2) {
-  border-bottom-width: 1px;
-}
-
-@media (min-width: 800px) {
-  .trustStrip {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .trustCell {
-    border-bottom-width: 0 !important;
-    border-right-width: 1px;
-  }
-
-  .trustCell:last-child {
-    border-right-width: 0;
-  }
-}
-
-/* ── How it works ── */
-
-.steps {
-  display: grid;
-  gap: 16px;
-}
-
-.step {
-  background: var(--surface);
-  border: 1px solid var(--card-edge);
-  border-radius: 16px;
-  padding: 22px;
-}
-
-.stepNum {
-  font-size: 12px;
-  font-weight: 750;
-  letter-spacing: 0.16em;
-  color: var(--label);
-  margin: 0 0 10px;
-}
-
-.stepTitle {
-  font-size: 18px;
-  margin: 0 0 8px;
-}
-
-.stepCopy {
+.itemCopy {
   font-size: 14px;
   line-height: 1.6;
   color: var(--text-dim);
   margin: 0;
 }
 
-.noAppLine {
-  margin: 28px 0 0;
-  font-size: 16px;
-  font-weight: 650;
-  text-align: center;
+/* ── Trust strip: borderless glyph row ── */
+
+.plainStrip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 40px;
+  padding: 6px 0;
+  list-style: none;
+  margin: 0;
+}
+
+.plainItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.plainItem svg {
+  color: var(--label);
+}
+
+/* ── How it works: editorial numbered flow ── */
+
+.stepsFlow {
+  display: grid;
+  gap: 36px 32px;
+}
+
+.stepGhost {
+  font-size: 44px;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: rgba(148, 163, 184, 0.22);
+  margin: 0 0 10px;
 }
 
 @media (min-width: 700px) {
-  .steps {
+  .stepsFlow {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (min-width: 1060px) {
-  .steps {
+  .stepsFlow {
     grid-template-columns: repeat(4, 1fr);
   }
+}
+
+.noAppLine {
+  margin: 40px 0 0;
+  font-size: 16px;
+  font-weight: 650;
+  text-align: center;
 }
 
 /* ── Meet → Scan → Save demo ── */
@@ -292,7 +279,7 @@
 }
 
 .demoPhone {
-  width: min(300px, 88vw);
+  width: min(340px, 90vw);
   background: var(--surface);
   border: 1px solid var(--card-edge);
   border-radius: 26px;
@@ -372,119 +359,188 @@
   }
 }
 
-/* ── Feature / use-case grids ── */
+/* ── Ways to share: icon-led hairline rows ── */
 
-.featureGrid {
+.shareList {
   display: grid;
-  gap: 16px;
+  gap: 0 56px;
 }
 
-.featureCard {
+.shareRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  padding: 22px 0;
+  border-top: 1px solid var(--card-edge);
+}
+
+.shareGlyph {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   background: var(--surface);
   border: 1px solid var(--card-edge);
-  border-radius: 16px;
-  padding: 22px;
-}
-
-.featureKicker {
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--label);
-  margin: 0 0 10px;
-}
-
-.featureTitle {
-  font-size: 17px;
-  margin: 0 0 8px;
-}
-
-.featureCopy {
-  font-size: 14px;
-  line-height: 1.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-dim);
-  margin: 0;
 }
 
-@media (min-width: 700px) {
-  .featureGrid {
+@media (min-width: 860px) {
+  .shareList {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (min-width: 1060px) {
-  .featureGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
+/* ── Privacy: borderless points + two-lane journey ── */
 
-/* ── Privacy comparison ── */
-
-.privacyPoints {
+.pointsRow {
   display: grid;
-  gap: 16px;
-  margin-bottom: 48px;
+  gap: 28px 32px;
+  margin-bottom: 64px;
+}
+
+.pointMark {
+  display: inline-flex;
+  color: var(--ok);
+  margin-bottom: 8px;
 }
 
 @media (min-width: 700px) {
-  .privacyPoints {
+  .pointsRow {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (min-width: 1060px) {
-  .privacyPoints {
+  .pointsRow {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
-.compareGrid {
+.lanes {
   display: grid;
-  gap: 20px;
+  gap: 48px;
 }
 
-.comparePanel {
-  border: 1px solid var(--card-edge);
-  border-radius: 18px;
-  padding: 24px;
+.lane {
+  min-width: 0;
 }
 
-.comparePanelByz {
-  background: var(--surface);
+.laneByz {
+  background: radial-gradient(120% 120% at 50% 0%, rgba(29, 41, 66, 0.45) 0%, transparent 70%);
+  border-radius: 20px;
+  padding: 4px 18px 12px;
+  margin: -4px -18px -12px;
 }
 
-.compareTitle {
-  font-size: 15px;
-  font-weight: 700;
-  margin: 0 0 18px;
-}
-
-.compareStep {
-  font-size: 14px;
-  color: var(--text-dim);
-  padding: 10px 12px;
-  border: 1px solid var(--card-edge);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.comparePanelByz .compareStep {
-  color: var(--text);
-}
-
-.compareDown {
-  text-align: center;
+.laneHead {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--label);
-  font-size: 13px;
-  line-height: 1.4;
-  padding: 3px 0;
+  border: 1px solid var(--card-edge);
+  border-radius: 999px;
+  padding: 6px 14px;
+  margin: 0 0 22px;
+}
+
+.laneHeadByz {
+  color: #0b1220;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.laneList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.laneList::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 14px;
+  bottom: 14px;
+  width: 1px;
+  background: var(--card-edge);
+}
+
+.laneItem {
+  position: relative;
+  padding: 12px 0 12px 32px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.laneItem::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 18px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--label);
+}
+
+.laneByz .laneItem {
+  color: var(--text);
+  font-weight: 550;
+}
+
+.laneByz .laneItem::before {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.laneNote {
+  margin: 44px auto 0;
+  max-width: 560px;
+  text-align: center;
+  font-size: clamp(18px, 3.5vw, 22px);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.laneNote span {
+  color: var(--text-dim);
 }
 
 @media (min-width: 860px) {
-  .compareGrid {
+  .lanes {
     grid-template-columns: 1fr 1fr;
-    gap: 28px;
+    gap: 72px;
+  }
+}
+
+/* ── Use cases: plain editorial list ── */
+
+.caseList {
+  display: grid;
+  gap: 26px 40px;
+}
+
+.caseItem {
+  border-top: 1px solid var(--card-edge);
+  padding-top: 16px;
+}
+
+@media (min-width: 700px) {
+  .caseList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1060px) {
+  .caseList {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -566,10 +622,43 @@
   margin: 10px 0 0;
 }
 
-.printFormats {
-  display: grid;
-  gap: 14px;
-  margin: 26px 0;
+/* Print formats as spec rows, not cards. */
+.specList {
+  margin: 30px 0 34px;
+}
+
+.specRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 18px;
+  padding: 16px 0;
+  border-top: 1px solid var(--card-edge);
+}
+
+.specRow:last-child {
+  border-bottom: 1px solid var(--card-edge);
+}
+
+.specName {
+  font-size: 16px;
+  font-weight: 650;
+  margin: 0;
+  min-width: 172px;
+}
+
+.specDims {
+  font-size: 14px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+.specNote {
+  flex-basis: 100%;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin: 2px 0 0;
 }
 
 @media (min-width: 960px) {
@@ -577,6 +666,26 @@
     grid-template-columns: 1fr 1fr;
     gap: 64px;
   }
+}
+
+/* ── Open source: light inline treatment ── */
+
+.inlineList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.inlineList li + li::before {
+  content: "·";
+  margin: 0 14px;
+  color: var(--label);
 }
 
 /* ── Final CTA + editorial ── */

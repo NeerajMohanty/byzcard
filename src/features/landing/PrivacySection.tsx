@@ -1,4 +1,5 @@
 import styles from "./landing.module.css";
+import { CheckGlyph } from "./icons";
 
 const POINTS = [
   { title: "No account", copy: "Start creating without signing up." },
@@ -17,34 +18,38 @@ const POINTS = [
 ] as const;
 
 const HOSTED_FLOW = [
-  "Create account",
-  "Create hosted profile",
-  "Profile stored by the service",
-  "Recipient loads the profile from the service",
+  "Create an account",
+  "Create a hosted profile",
+  "The service stores your profile",
+  "Recipient loads it from the service",
 ] as const;
 
 const BYZCARD_FLOW = [
-  "Create card",
+  "Create your card",
   "Stored on your device",
   "Show your QR",
   "Recipient opens the shared card",
 ] as const;
 
-function Flow({ steps }: { steps: readonly string[] }) {
+function Lane({
+  title,
+  steps,
+  highlighted,
+}: {
+  title: string;
+  steps: readonly string[];
+  highlighted: boolean;
+}) {
   return (
-    <div>
-      {steps.map((step, index) => (
-        <div key={step}>
-          {index > 0 && (
-            <p className={styles.compareDown} aria-hidden="true">
-              ↓
-            </p>
-          )}
-          <p className={styles.compareStep} style={{ margin: 0 }}>
+    <div className={`${styles.lane} ${highlighted ? styles.laneByz : ""}`}>
+      <p className={`${styles.laneHead} ${highlighted ? styles.laneHeadByz : ""}`}>{title}</p>
+      <ol className={styles.laneList}>
+        {steps.map((step) => (
+          <li key={step} className={styles.laneItem}>
             {step}
-          </p>
-        </div>
-      ))}
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -54,6 +59,7 @@ export function PrivacySection() {
     <section id="privacy" className={`${styles.section} ${styles.anchorTarget}`}>
       <div className={styles.container}>
         <div className={styles.sectionHead}>
+          <p className={styles.sectionEyebrow}>Privacy</p>
           <h2 className={styles.sectionTitle}>Your card belongs to you.</h2>
           <p className={styles.lede}>
             BYZCARD doesn’t require an account and doesn’t keep a database of your business card.
@@ -61,24 +67,24 @@ export function PrivacySection() {
             only when you intentionally use a sharing feature.
           </p>
         </div>
-        <div className={styles.privacyPoints}>
+        <div className={styles.pointsRow}>
           {POINTS.map((point) => (
-            <div key={point.title} className={styles.featureCard}>
-              <h3 className={styles.featureTitle}>{point.title}</h3>
-              <p className={styles.featureCopy}>{point.copy}</p>
+            <div key={point.title}>
+              <span className={styles.pointMark}>
+                <CheckGlyph />
+              </span>
+              <h3 className={styles.itemTitle}>{point.title}</h3>
+              <p className={styles.itemCopy}>{point.copy}</p>
             </div>
           ))}
         </div>
-        <div className={styles.compareGrid}>
-          <div className={styles.comparePanel}>
-            <h3 className={styles.compareTitle}>Typical hosted digital card</h3>
-            <Flow steps={HOSTED_FLOW} />
-          </div>
-          <div className={`${styles.comparePanel} ${styles.comparePanelByz}`}>
-            <h3 className={styles.compareTitle}>BYZCARD</h3>
-            <Flow steps={BYZCARD_FLOW} />
-          </div>
+        <div className={styles.lanes}>
+          <Lane title="Typical hosted digital card" steps={HOSTED_FLOW} highlighted={false} />
+          <Lane title="BYZCARD" steps={BYZCARD_FLOW} highlighted />
         </div>
+        <p className={styles.laneNote}>
+          The difference: <span>with BYZCARD, there’s no service in the middle.</span>
+        </p>
       </div>
     </section>
   );

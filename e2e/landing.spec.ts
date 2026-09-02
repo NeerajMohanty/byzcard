@@ -58,7 +58,7 @@ test("print and privacy sections are present with accurate content", async ({ pa
   await page.goto("/");
   await page.locator("#print").scrollIntoViewIfNeeded();
   await expect(page.getByText("CR80 · 3.375 × 2.125 in")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "4 × 6 in" })).toBeVisible();
+  await expect(page.locator("#print").getByText("4 × 6 in", { exact: true })).toBeVisible();
   await page.locator("#privacy").scrollIntoViewIfNeeded();
   await expect(page.getByRole("heading", { name: "Your card belongs to you." })).toBeVisible();
   const bodyText = await page.locator("body").innerText();

@@ -6,8 +6,13 @@
 import {
   CARD_SCHEMA_VERSION,
   FIELD_LIMITS,
+  LINK_SERVICES,
+  LINK_VALUE_LIMIT,
+  OPTIONAL_LINK_LIMITS,
   type Card,
   type CardFields,
+  type LinkEntry,
+  type LinkGroup,
   type ValidationIssue,
   type ValidationResult,
 } from "./types";
@@ -65,6 +70,49 @@ function checkLength(
   }
 }
 
+/** Validate one optional link group: allowed service, valid URL, capped. */
+function validateLinkGroup(
+  group: LinkGroup,
+  raw: unknown,
+  issues: ValidationIssue[],
+): LinkEntry[] | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  if (!Array.isArray(raw)) {
+    issues.push({ field: group, message: "Invalid entries" });
+    return undefined;
+  }
+  if (raw.length === 0) return undefined;
+  if (raw.length > OPTIONAL_LINK_LIMITS[group]) {
+    issues.push({
+      field: group,
+      message: `Up to ${OPTIONAL_LINK_LIMITS[group]} entries are supported`,
+    });
+    return undefined;
+  }
+  const serviceIds = new Set(LINK_SERVICES[group].map((s) => s.id));
+  const entries: LinkEntry[] = [];
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null) {
+      issues.push({ field: group, message: "Invalid entry" });
+      return undefined;
+    }
+    const record = item as Record<string, unknown>;
+    const service = typeof record.service === "string" ? record.service : "";
+    const value = typeof record.value === "string" ? record.value : "";
+    if (!serviceIds.has(service)) {
+      issues.push({ field: group, message: "Choose a service for each entry" });
+      return undefined;
+    }
+    const normalized = normalizeWebUrl(value);
+    if (normalized === null || [...normalized].length > LINK_VALUE_LIMIT) {
+      issues.push({ field: group, message: "Each entry needs a valid link or URL" });
+      return undefined;
+    }
+    entries.push({ service, value: normalized });
+  }
+  return entries;
+}
+
 /** Validate and normalize raw user input into CardFields. */
 export function validateCardFields(input: Record<string, unknown>): ValidationResult {
   const issues: ValidationIssue[] = [];
@@ -108,8 +156,40 @@ export function validateCardFields(input: Record<string, unknown>): ValidationRe
   if (website !== undefined) checkLength("website", website, issues);
   if (linkedin !== undefined) checkLength("linkedin", linkedin, issues);
 
+  // Optional profile fields — cleaned, length-capped, absent when blank.
+  const preferredNameRaw = clean(input.preferredName);
+  const pronounsRaw = clean(input.pronouns);
+  const headlineRaw = clean(input.headline);
+  checkLength("preferredName", preferredNameRaw, issues);
+  checkLength("pronouns", pronounsRaw, issues);
+  checkLength("headline", headlineRaw, issues);
+  const preferredName = preferredNameRaw === "" ? undefined : preferredNameRaw;
+  const pronouns = pronounsRaw === "" ? undefined : pronounsRaw;
+  const headline = headlineRaw === "" ? undefined : headlineRaw;
+
+  const social = validateLinkGroup("social", input.social, issues);
+  const messaging = validateLinkGroup("messaging", input.messaging, issues);
+  const links = validateLinkGroup("links", input.links, issues);
+
   if (issues.length > 0) return { ok: false, issues };
-  return { ok: true, fields: { fullName, role, company, phone, email, website, linkedin } };
+  return {
+    ok: true,
+    fields: {
+      fullName,
+      role,
+      company,
+      phone,
+      email,
+      website,
+      linkedin,
+      preferredName,
+      pronouns,
+      headline,
+      social,
+      messaging,
+      links,
+    },
+  };
 }
 
 /** Build a full Card from validated fields, preserving identity when editing. */

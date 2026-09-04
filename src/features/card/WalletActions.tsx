@@ -13,9 +13,39 @@ import { loadWalletIds, saveWalletIds, type StoredPhoto } from "@/adapters/idb/c
 import { photoToWalletPng } from "@/adapters/photo/process";
 import { isAndroid, isIos } from "@/lib/platform";
 
+export interface WalletVisibility {
+  showApple: boolean;
+  showGoogle: boolean;
+}
+
+/**
+ * Availability + platform gating for the Wallet feature. Both flags stay
+ * false until the (aborted-on-unmount) config fetch resolves; offline or
+ * unconfigured deployments simply never show any Wallet UI.
+ */
+export function useWalletVisibility(): WalletVisibility {
+  const [availability, setAvailability] = useState<WalletAvailability | "offline" | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchWalletAvailability(controller.signal).then((result) => {
+      if (!controller.signal.aborted) setAvailability(result);
+    });
+    return () => controller.abort();
+  }, []);
+
+  const available = availability !== null && availability !== "offline" ? availability : null;
+  return {
+    showApple: available?.apple === true && !isAndroid(),
+    showGoogle: available?.google === true && !isIos(),
+  };
+}
+
 interface WalletActionsProps {
   card: Card;
   photo: StoredPhoto | null;
+  showApple: boolean;
+  showGoogle: boolean;
 }
 
 type Busy = "apple" | "google" | null;
@@ -31,26 +61,16 @@ async function ensureWalletIds(): Promise<
   return next;
 }
 
-export function WalletActions({ card, photo }: WalletActionsProps) {
-  const [availability, setAvailability] = useState<WalletAvailability | "offline" | null>(null);
+export function WalletActions({ card, photo, showApple, showGoogle }: WalletActionsProps) {
   const [hasPassIdentity, setHasPassIdentity] = useState(false);
   const [busy, setBusy] = useState<Busy>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    // Aborting on unmount keeps navigation from killing an in-flight fetch
-    // uncleanly (WebKit logs interrupted fetches to the console).
-    const controller = new AbortController();
-    void fetchWalletAvailability(controller.signal).then((result) => {
-      if (!controller.signal.aborted) setAvailability(result);
-    });
     void loadWalletIds().then((ids) => setHasPassIdentity(ids.appleSerialNumber !== undefined));
-    return () => controller.abort();
   }, []);
 
-  const available = availability !== null && availability !== "offline" ? availability : null;
-  const showApple = available?.apple === true && !isAndroid();
-  const showGoogle = available?.google === true && !isIos();
+  if (!showApple && !showGoogle) return null;
 
   const handleApple = async () => {
     setBusy("apple");
@@ -86,23 +106,6 @@ export function WalletActions({ card, photo }: WalletActionsProps) {
     }
   };
 
-  if (availability === null) return null;
-  if (availability === "offline") {
-    return (
-      <p className="note">
-        Wallet passes need an internet connection. Everything else on this page works offline.
-      </p>
-    );
-  }
-  if (!showApple && !showGoogle) {
-    return (
-      <p className="note">
-        Wallet passes are not configured on this BYZCARD instance. Everything else works without
-        them.
-      </p>
-    );
-  }
-
   return (
     <div className="stack">
       {showApple && (
@@ -135,7 +138,7 @@ export function WalletActions({ card, photo }: WalletActionsProps) {
         </p>
       )}
       <p className="note">
-        Wallet passes are signed by the BYZCARD server in memory; your card is not stored there.
+        Wallet passes are signed by the Byzcard server in memory; your card is not stored there.
         {showGoogle && " The Google Wallet pass shows your details and QR without the photo."}
       </p>
     </div>

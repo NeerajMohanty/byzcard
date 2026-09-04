@@ -47,6 +47,31 @@ describe("backup export/import codec", () => {
     }
   });
 
+  it("round-trips the photo crop and tolerates its absence or corruption", () => {
+    const card = makeCard();
+    const photo = {
+      mimeType: "image/jpeg" as const,
+      width: 512,
+      height: 512,
+      dataBase64: "QUJDRA==",
+    };
+    const text = serializeBackup(
+      { card, photo, photoCrop: { x: -0.5, y: 0.25, zoom: 1.8 } },
+      "2026-09-02T00:00:00.000Z",
+    );
+    const parsed = parseBackup(text);
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) expect(parsed.backup.photoCrop).toEqual({ x: -0.5, y: 0.25, zoom: 1.8 });
+
+    // Older backups (no photoCrop) and damaged crops still import cleanly.
+    const legacy = parseBackup(serializeBackup({ card, photo }, "2026-09-02T00:00:00.000Z"));
+    expect(legacy.ok && legacy.backup.photoCrop === undefined).toBe(true);
+    const withBadCrop = JSON.parse(text) as Record<string, unknown>;
+    withBadCrop.photoCrop = { x: "left", zoom: null };
+    const tolerant = parseBackup(JSON.stringify(withBadCrop));
+    expect(tolerant.ok && tolerant.backup.photoCrop === undefined).toBe(true);
+  });
+
   it("rejects non-JSON and non-backup files", () => {
     expect(parseBackup("not json at all")).toEqual({ ok: false, error: "not-json" });
     expect(parseBackup("{}")).toEqual({ ok: false, error: "not-backup" });

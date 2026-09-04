@@ -19,6 +19,15 @@ function fill(label: RegExp, value: string) {
 }
 
 describe("EditorScreen", () => {
+  it("uses device-neutral storage copy", async () => {
+    render(<EditorScreen />);
+    await screen.findByLabelText(/Full name/u);
+    expect(
+      screen.getByText("Your card and photo are stored only in this browser, on this device."),
+    ).toBeDefined();
+    expect(document.body.textContent).not.toContain("on this phone");
+  });
+
   it("live-updates the card preview while typing", async () => {
     render(<EditorScreen />);
     await screen.findByLabelText(/Full name/u);

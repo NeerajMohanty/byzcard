@@ -72,7 +72,7 @@ describe("Google Wallet save JWT", () => {
     const cardTitle = obj.cardTitle as { defaultValue: { value: string } };
     const header = obj.header as { defaultValue: { value: string } };
     const subheader = obj.subheader as { defaultValue: { value: string } };
-    expect(cardTitle.defaultValue.value).toBe("BYZCARD");
+    expect(cardTitle.defaultValue.value).toBe("Byzcard");
     expect(header.defaultValue.value).toBe("Ada Lovelace");
     expect(subheader.defaultValue.value).toBe("Chief Analyst");
     expect(obj.id).toBe("3388000000000000000.abcdef0123456789");

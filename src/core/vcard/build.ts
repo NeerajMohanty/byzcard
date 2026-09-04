@@ -3,7 +3,7 @@
  * vCard 3.0 is used (not 4.0) because iOS and Android contact apps have the
  * most reliable import behavior with 3.0, including embedded base64 photos.
  */
-import type { CardFields } from "../card/types";
+import { linkEntryLabel, type CardFields, type LinkGroup } from "../card/types";
 
 const CRLF = "\r\n";
 /** Maximum octets per line before folding (RFC 2426 §2.6). */
@@ -71,10 +71,25 @@ export function buildVcard(fields: CardFields, photo?: VcardPhoto): string {
     `TEL;TYPE=CELL:${escapeVcardText(fields.phone)}`,
     `EMAIL;TYPE=INTERNET:${escapeVcardText(fields.email)}`,
   ];
+  if (fields.preferredName !== undefined) {
+    // Preferred name maps to NICKNAME; FN stays the canonical full name.
+    lines.push(`NICKNAME:${escapeVcardText(fields.preferredName)}`);
+  }
   if (fields.website !== undefined) lines.push(`URL:${escapeVcardText(fields.website)}`);
+  let item = 0;
   if (fields.linkedin !== undefined) {
-    lines.push(`item1.URL:${escapeVcardText(fields.linkedin)}`);
-    lines.push("item1.X-ABLabel:LinkedIn");
+    item += 1;
+    lines.push(`item${item}.URL:${escapeVcardText(fields.linkedin)}`);
+    lines.push(`item${item}.X-ABLabel:LinkedIn`);
+  }
+  // Optional social/messaging/link entries as labeled URL items (all values
+  // are normalized https URLs, so this stays standards-safe vCard 3.0).
+  for (const group of ["social", "messaging", "links"] as LinkGroup[]) {
+    for (const entry of fields[group] ?? []) {
+      item += 1;
+      lines.push(`item${item}.URL:${escapeVcardText(entry.value)}`);
+      lines.push(`item${item}.X-ABLabel:${escapeVcardText(linkEntryLabel(group, entry))}`);
+    }
   }
   if (photo !== undefined) {
     lines.push(`PHOTO;ENCODING=b;TYPE=${photoTypeParam(photo.mimeType)}:${photo.base64}`);

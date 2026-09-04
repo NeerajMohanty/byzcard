@@ -3,6 +3,78 @@
 .page {
   background: var(--bg);
   overflow-x: clip;
+
+  /* ── Byzcard landing elevation system ──────────────────────────────
+     Four levels, scoped to the marketing page so the application UI is
+     untouched. Every surface below picks one combination of border +
+     shadow + inner highlight + background tone; nothing is ad hoc.
+
+       level 0  flat page / tonal band            (no shadow)
+       level 1  small utility plate               --elev-1
+       level 2  elevated paper panel              --elev-2
+       level 3  featured physical object          --elev-ink
+
+     Shadows are warm (brown-black, not neutral grey) so they read as
+     light falling on cream paper rather than as grey haze. */
+  --e-line: rgba(23, 19, 17, 0.07);
+  --e-line-base: rgba(23, 19, 17, 0.11);
+  --e-paper-top: #fffefd;
+  --e-paper-bottom: #fdf9f4;
+  --e-sheen: rgba(255, 255, 255, 0.9);
+
+  --elev-1: 0 1px 1px rgba(38, 28, 20, 0.04), 0 2px 5px -2px rgba(38, 28, 20, 0.06);
+  --elev-2:
+    0 1px 1.5px rgba(38, 28, 20, 0.05), 0 5px 12px -3px rgba(38, 28, 20, 0.07),
+    0 16px 30px -12px rgba(38, 28, 20, 0.1);
+  /* ── The Byzcard ink material ──────────────────────────────────────
+     One material in three weights, shared by every product surface on this
+     page: the hero card, the owner demo card, the recipient screen, the
+     comparison panel and both print previews. Nothing else uses it.
+
+     A dark card on warm paper reads through four things at once: tone
+     across the face, a lit top edge, a shaded lower edge, and stock
+     thickness underneath. Each gets its own token. */
+
+  /* Face: deep navy with light falling from the upper left, so the surface
+     has tone across it instead of one flat fill. */
+  --ink-face:
+    radial-gradient(
+      135% 100% at 14% -12%,
+      rgba(122, 154, 216, 0.22) 0%,
+      rgba(122, 154, 216, 0) 58%
+    ),
+    linear-gradient(168deg, #15203a 0%, #0d1526 48%, #080d18 100%);
+
+  /* Rim: crisp, lit along the top, shaded along the bottom. */
+  --ink-border: #26324e;
+  --ink-border-top: #3e4c70;
+  --ink-border-bottom: #121a2b;
+
+  /* Controlled inner highlights — the edge lighting of the object itself. */
+  --ink-inner:
+    inset 0 1px 0 rgba(255, 255, 255, 0.17), inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+
+  /* Stock thickness: hard, unblurred offsets that follow the radius and
+     read as the card's own edge rather than as a shadow. */
+  --ink-thickness-3: 0 2px 0 #080e1a, 0 3px 0 #050a13;
+  --ink-thickness-2: 0 2px 0 #070c16;
+
+  /* Lift off the cream: tight contact, mid drop, wide warm ambient pool. */
+  --ink-lift-3:
+    0 5px 8px -2px rgba(24, 16, 10, 0.24), 0 18px 30px -10px rgba(24, 16, 10, 0.26),
+    0 46px 72px -30px rgba(38, 26, 16, 0.44);
+  /* Nested inside a paper frame, where a full ambient pool would muddy. */
+  --ink-lift-nested: 0 3px 6px -1px rgba(6, 10, 20, 0.4), 0 12px 22px -8px rgba(6, 10, 20, 0.4);
+}
+
+/* The featured object: the hero card and the owner card in the demo. Both
+   are the same CardView — only its outer presentation is set here. */
+.reelFace > article {
+  background: var(--ink-face);
+  border: 1px solid var(--ink-border);
+  border-top-color: var(--ink-border-top);
+  border-bottom-color: var(--ink-border-bottom);
 }
 
 .container {
@@ -17,7 +89,7 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(5, 7, 13, 0.92);
+  background: rgba(247, 243, 236, 0.92);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--card-edge);
 }
@@ -31,7 +103,7 @@
 }
 
 .wordmark {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 750;
   letter-spacing: 0.2em;
   color: var(--text);
@@ -43,15 +115,19 @@
   gap: 26px;
 }
 
+/* Nav items carry the primary heading ink, not a faded grey — the size,
+   weight and font are unchanged; only the colour is. */
 .navLinks a {
-  color: var(--text-dim);
+  color: var(--text);
   text-decoration: none;
   font-size: 14px;
 }
 
 .navLinks a:hover,
 .navLinks a:focus-visible {
-  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 1.5px;
 }
 
 .navActions {
@@ -64,6 +140,23 @@
   .navLinks {
     display: flex;
   }
+}
+
+/* Landing-only button lift. Colours, sizes and contrast are unchanged —
+   this adds a contact shadow so the CTAs sit on the page rather than in it. */
+.page :global(.btn) {
+  box-shadow: var(--elev-1);
+}
+
+.page :global(.btn-primary) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 1px 2px rgba(24, 16, 10, 0.18),
+    0 7px 16px -7px rgba(24, 16, 10, 0.32);
+}
+
+.page :global(.btn):active {
+  box-shadow: var(--elev-1);
 }
 
 /* Inline (non-full-width) variants of the shared button classes. */
@@ -101,11 +194,20 @@
 }
 
 .heroTitle {
-  font-size: clamp(33px, 8vw, 48px);
-  line-height: 1.1;
+  font-size: clamp(30px, 3.6vw, 40px);
+  line-height: 1.14;
   letter-spacing: -0.02em;
-  text-wrap: balance;
   margin: 0 0 18px;
+}
+
+/* One baseline row per segment. The rotating word is a flex sibling of the
+   phrase, so a real gap always separates them and it can never drift to the
+   far edge of the line. The row wraps within itself when it has to. */
+.heroPhrase {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 0.26em;
 }
 
 .heroCopy {
@@ -138,22 +240,173 @@
 
 .heroCard {
   width: 100%;
-  max-width: 380px;
+  max-width: 330px;
   margin: 0 auto;
 }
 
-@media (min-width: 960px) {
+/* Stacked: a measured gap between the copy block and the card, never a
+   viewport-sized hole. */
+@media (max-width: 899px) {
+  .heroGrid {
+    gap: 40px;
+  }
+
+  /* Each segment takes its own line, so the heading keeps one shape while the
+     final word cycles through its different lengths. */
+  .heroPhrase {
+    display: flex;
+  }
+}
+
+/* Narrow enough that the longest word cannot share the phrase's line: give
+   the rotating word its own row so the line count never shifts mid-cycle. */
+@media (max-width: 560px) {
+  .heroPhrase > span:first-child {
+    flex: 0 0 100%;
+  }
+}
+
+/* ── Pointer-reactive surfaces ──────────────────────────────────────
+   Two elements use these: the hero glass shell and the Byzcard comparison
+   panel. Both lean a couple of degrees toward the pointer and spring back.
+   No touch-action is set, so a finger dragging vertically still scrolls. */
+.tiltSurface {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tiltGlare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 4;
+  mix-blend-mode: screen;
+}
+
+/* The stage supplies the perspective the tilt is read through. */
+.heroStage {
+  perspective: 1200px;
+}
+
+/* ── Smoked glass ─────────────────────────────────────────────────────
+   The card face is genuinely translucent, so the diffuse field behind it is
+   what the backdrop blur acts on. Two soft tonal blobs sit back there — one
+   cool, one warm — giving the blur something with structure to smear. */
+.inkGlass {
+  position: relative;
+  border-radius: var(--radius-card);
+}
+
+/* Cool navy pool, lower right. */
+.inkGlass::before {
+  content: "";
+  position: absolute;
+  inset: -8% -9% -12%;
+  background:
+    radial-gradient(38% 30% at 72% 68%, rgba(64, 108, 198, 0.95) 0%, rgba(64, 108, 198, 0) 70%),
+    radial-gradient(34% 26% at 24% 22%, rgba(138, 174, 240, 0.8) 0%, rgba(138, 174, 240, 0) 72%),
+    radial-gradient(30% 24% at 56% 44%, rgba(92, 132, 214, 0.55) 0%, rgba(92, 132, 214, 0) 74%);
+  filter: blur(22px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Warm reflection bouncing off the cream page, lower left. */
+.inkGlass::after {
+  content: "";
+  position: absolute;
+  inset: 26% -8% -12% -7%;
+  background: radial-gradient(
+    42% 40% at 26% 74%,
+    rgba(226, 182, 130, 0.62) 0%,
+    rgba(226, 182, 130, 0) 72%
+  );
+  filter: blur(26px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* The glass itself: smoked navy, genuinely translucent. No opaque backing
+   layer — the tonal field and the cream page read through the face, which is
+   what the backdrop blur works on. Dark enough that the white type keeps
+   strong contrast; the QR sits on its own white plate and stays crisp. */
+.inkGlass > article {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(
+    166deg,
+    rgba(22, 35, 62, 0.82) 0%,
+    rgba(13, 21, 39, 0.88) 44%,
+    rgba(7, 12, 23, 0.93) 100%
+  );
+  /* Standard property only: the build auto-prefixes it. A hand-written
+     -webkit- twin makes the minifier keep just the prefixed copy, which
+     this engine ignores — the blur silently vanishes from the build. */
+  backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid rgba(126, 158, 220, 0.26);
+  border-top-color: rgba(186, 210, 250, 0.55);
+  border-bottom-color: rgba(4, 8, 16, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 26px 52px -26px rgba(170, 202, 255, 0.3),
+    inset 0 -40px 70px -50px rgba(226, 182, 130, 0.2),
+    var(--ink-thickness-3),
+    var(--ink-lift-3);
+}
+
+/* One specular streak reading across the upper-left face. */
+.inkGlassSheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.05) 24%,
+    rgba(255, 255, 255, 0) 48%
+  );
+}
+
+/* Inside a stack layer the card only needs contact depth; a second ambient
+   pool under a lifted paper card reads as mud. */
+.reelFace > article {
+  box-shadow: var(--ink-inner), var(--ink-thickness-3), var(--ink-lift-nested);
+}
+
+/* Two columns: the card column rides one continuous ramp — 280px at 900
+   through 380px at 1440 and up — so every width gets a card sized for it
+   instead of a desktop card overflowing a smaller window. */
+@media (min-width: 900px) {
+  .hero {
+    padding: 72px 0 80px;
+  }
+
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr) clamp(280px, 18.5vw + 114px, 380px);
+    gap: 36px;
+    align-items: center;
+  }
+
+  .heroCard {
+    max-width: none;
+    margin: 0 0 0 auto;
+  }
+}
+
+/* Wide desktop: same ramp, roomier frame. */
+@media (min-width: 1280px) {
   .hero {
     padding: 88px 0 96px;
   }
 
   .heroGrid {
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 72px;
-  }
-
-  .heroCard {
-    margin: 0 0 0 auto;
+    gap: 44px;
   }
 }
 
@@ -164,7 +417,7 @@
 }
 
 .sectionAlt {
-  background: #090e1b;
+  background: #f0ebe2;
   border-top: 1px solid var(--card-edge);
   border-bottom: 1px solid var(--card-edge);
 }
@@ -195,6 +448,19 @@
   line-height: 1.6;
   color: var(--text-dim);
   margin: 0;
+}
+
+/* Opt-in for headings that read better unbroken. The 680px measure that
+   suits body-length heads is what forces the break, so it is lifted only
+   once the container is wide enough to hold the line outright. */
+@media (min-width: 1120px) {
+  .sectionHeadWide {
+    max-width: none;
+  }
+
+  .titleOneLine {
+    white-space: nowrap;
+  }
 }
 
 @media (min-width: 960px) {
@@ -241,6 +507,47 @@
   color: var(--label);
 }
 
+/* ── How it works: the heading types itself in, once ── */
+
+.typeLine {
+  display: grid;
+}
+
+/* Both copies share one cell. The hidden one holds the finished heading's box
+   open, so the lede below it never moves as characters arrive. */
+.typeLine > * {
+  grid-area: 1 / 1;
+}
+
+.typeGhost {
+  visibility: hidden;
+}
+
+.typeCursor {
+  display: inline-block;
+  margin-left: 0.05em;
+  font-weight: 300;
+  color: var(--label);
+}
+
+/* The blink sits on an inner element so the fade-out on the wrapper is not
+   overridden by this animation. */
+.typeCaret {
+  display: inline-block;
+  animation: typeCaretBlink 1.05s steps(1, end) infinite;
+}
+
+@keyframes typeCaretBlink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0;
+  }
+}
+
 /* ── How it works: editorial numbered flow ── */
 
 .stepsFlow {
@@ -253,7 +560,7 @@
   font-weight: 750;
   line-height: 1;
   letter-spacing: -0.02em;
-  color: rgba(148, 163, 184, 0.22);
+  color: rgba(23, 19, 17, 0.13);
   margin: 0 0 10px;
 }
 
@@ -276,44 +583,14 @@
   text-align: center;
 }
 
-/* ── Meet → Scan → Save demo ── */
-
-.demo {
-  margin-top: 48px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.demoPhone {
-  width: min(340px, 90vw);
-  background: var(--surface);
-  border: 1px solid var(--card-edge);
-  border-radius: 26px;
-  padding: 14px;
-}
-
-.demoLabel {
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--label);
-  text-align: center;
-  margin: 0 0 10px;
-}
-
-.demoArrow {
-  color: var(--label);
-  flex-shrink: 0;
-}
-
 .recipientMock {
-  background: var(--card);
-  border: 1px solid var(--card-edge);
+  background: var(--ink-face);
+  border: 1px solid var(--ink-border);
+  border-top-color: var(--ink-border-top);
+  border-bottom-color: var(--ink-border-bottom);
   border-radius: 16px;
   padding: 16px;
+  box-shadow: var(--ink-inner), var(--ink-thickness-2), var(--ink-lift-nested);
 }
 
 .recipientTop {
@@ -335,68 +612,621 @@
   margin: 2px 0 0;
 }
 
+.recipientHeadline {
+  font-size: 11.5px;
+  line-height: 1.45;
+  opacity: 0.85;
+  margin: 0 0 10px;
+}
+
 .recipientRow {
   font-size: 12px;
   color: var(--text-dim);
   margin: 4px 0 0;
 }
 
+/* ── Scan state: a phone camera framed on the card's QR ──
+   A thin bezel with a lens dot stands in for the phone; inside it, the
+   camera view is the dark card surface itself — the real link row and the
+   real QR — under viewfinder corners and a slow scan beam. */
+.scanMock {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0;
+}
+
+.scanPhone {
+  position: relative;
+  width: min(252px, 100%);
+  border: 2px solid rgba(23, 19, 17, 0.55);
+  border-radius: 30px;
+  padding: 24px 10px 10px;
+  background: linear-gradient(180deg, rgba(23, 19, 17, 0.05) 0%, rgba(23, 19, 17, 0.02) 100%);
+}
+
+/* The camera lens, centred in the bezel's top strip. */
+.scanLens {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(23, 19, 17, 0.4);
+}
+
+.scanView {
+  border-radius: 18px;
+  overflow: hidden;
+  padding: 14px 12px 16px;
+  background: var(--ink-face);
+  border: 1px solid var(--ink-border);
+  border-top-color: var(--ink-border-top);
+  border-bottom-color: var(--ink-border-bottom);
+  box-shadow: var(--ink-inner), var(--ink-thickness-2), var(--ink-lift-nested);
+}
+
+/* The card's own link row, for context above the QR. */
+.scanChips {
+  margin: 0 0 12px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.scanQrArea {
+  position: relative;
+  width: 168px;
+  margin: 0 auto;
+}
+
+.scanQrBox {
+  /* The QR symbol renders its own white quiet zone; hold the square while
+     it is computed so the reel never measures a collapsed state. */
+  aspect-ratio: 1;
+}
+
+.scanCorner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.85);
+}
+
+.scanCornerTl {
+  top: -8px;
+  left: -8px;
+  border-right: 0;
+  border-bottom: 0;
+  border-top-left-radius: 8px;
+}
+
+.scanCornerTr {
+  top: -8px;
+  right: -8px;
+  border-left: 0;
+  border-bottom: 0;
+  border-top-right-radius: 8px;
+}
+
+.scanCornerBl {
+  bottom: -8px;
+  left: -8px;
+  border-right: 0;
+  border-top: 0;
+  border-bottom-left-radius: 8px;
+}
+
+.scanCornerBr {
+  bottom: -8px;
+  right: -8px;
+  border-left: 0;
+  border-top: 0;
+  border-bottom-right-radius: 8px;
+}
+
+/* The slow sweep. Quiet on purpose: the reel's travel stays the big motion. */
+.scanBeam {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 8px;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+  /* Transform + opacity only, so the sweep never touches layout. The area is
+     a fixed 168px square: 8px + 148px of travel lands at the old 93% mark. */
+  animation: scanSweep 2.2s ease-in-out infinite;
+}
+
+/* The beam only sweeps while its state is the front card. */
+.reelItem[aria-hidden="true"] .scanBeam,
+.reelItemStatic[aria-hidden="true"] .scanBeam {
+  animation-play-state: paused;
+}
+
+@keyframes scanSweep {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.8;
+  }
+  88% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(148px);
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: a static viewfinder, no sweep at all. */
+@media (prefers-reduced-motion: reduce) {
+  .scanBeam {
+    display: none;
+  }
+}
+
 .savePill {
   margin-top: 14px;
-  background: var(--accent);
+  background: #e8eaf0;
   color: #0b1220;
   border-radius: 12px;
   font-weight: 650;
   font-size: 14px;
   text-align: center;
   padding: 11px 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.demoCaption {
-  margin-top: 8px;
-  font-size: 13px;
-  color: var(--label);
+/* ── Ways to share: the phrase arrives inside a plate that fits it ── */
+
+.phrasePlate {
+  display: inline-flex;
+  align-items: baseline;
+  vertical-align: baseline;
+  transform-origin: left center;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(23, 19, 17, 0.045);
+  border-radius: 0.18em;
+  padding: 0.02em 0.16em 0.08em;
+  margin-left: 0.04em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 4px 14px -10px rgba(38, 28, 20, 0.14);
+}
+
+.phraseWord {
+  display: inline-block;
+}
+
+/* ── Meet · Scan · Save product reel ─────────────────────────────────
+   A vertical reel: the active state is centred and sharp, its neighbours
+   peek above and below — faded, scaled and blurred — and advancing moves
+   every state one seat through the reel. Each state keeps its intrinsic
+   height; the stage hugs the active one, so no state is padded out to
+   match another's box. */
+.reelWrap {
+  margin: 44px auto 0;
+  max-width: 880px;
+  display: grid;
+  gap: 30px;
+  justify-items: center;
+}
+
+@media (min-width: 900px) {
+  .reelWrap {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 56px;
+    align-items: center;
+    justify-items: stretch;
+  }
+}
+
+.reelStage {
+  position: relative;
+  width: min(340px, 100%);
+  overflow: hidden;
+  justify-self: center;
+}
+
+/* One state in the reel. Seats are animated in px from the stage's vertical
+   centre, so every state keeps its own height. */
+.reelItem {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  will-change: transform, opacity, filter;
+}
+
+/* Server layout, before the stage is measured: the first state sits in
+   normal flow with the peek space around it; the others are laid out only
+   to be measured. */
+.reelItemStatic {
+  position: relative;
+  left: 0;
+  right: 0;
+  margin: 56px 0;
+}
+
+.reelFace {
+  position: relative;
+}
+
+.reelSide {
+  width: 100%;
+  max-width: 400px;
   text-align: center;
 }
 
-@media (min-width: 960px) {
-  .demo {
-    flex-direction: row;
-    justify-content: center;
+@media (min-width: 900px) {
+  .reelSide {
+    max-width: none;
+    text-align: left;
+  }
+}
+
+.reelCopy {
+  /* Fits the longest description, so the arrows never jump. */
+  min-height: 122px;
+}
+
+.reelTitle {
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+}
+
+.reelDesc {
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--text-dim);
+  margin: 0 auto;
+  max-width: 44ch;
+}
+
+@media (min-width: 900px) {
+  .reelDesc {
+    margin: 0;
+  }
+}
+
+.reelControls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.reelArrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--e-paper-top) 0%, var(--e-paper-bottom) 100%);
+  border: 1px solid var(--e-line);
+  border-bottom-color: var(--e-line-base);
+  box-shadow:
+    inset 0 1px 0 var(--e-sheen),
+    var(--elev-1);
+}
+
+.reelArrow:hover {
+  box-shadow:
+    inset 0 1px 0 var(--e-sheen),
+    var(--elev-2);
+}
+
+.reelArrow:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.reelDots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+@media (min-width: 900px) {
+  .reelControls,
+  .reelDots {
+    justify-content: flex-start;
+  }
+}
+
+.reelDot {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reelDot::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(23, 19, 17, 0.24);
+}
+
+.reelDotOn::before {
+  width: 9px;
+  height: 9px;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(23, 19, 17, 0.08);
+}
+
+.reelDot:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+  border-radius: 50%;
+}
+
+.stackAvatar {
+  width: 44px;
+  height: 55px;
+  font-size: 15px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #1d2942 0%, #131b30 100%);
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.stackActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.stackAction {
+  flex: 1 1 auto;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.stackContact {
+  margin: 14px 0 18px;
+}
+
+.stackSaveNote {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  opacity: 0.75;
+  text-align: center;
+}
+
+/* ── Ways to share: a scroll-driven sticky deck ───────────────────────
+   Every card is a plain sticky sibling in one container, so the document's
+   own scroll drives the stack — no scroll hijacking, no internal scroller,
+   no scroll-timeline dependency. Each layer parks 13px lower than the one
+   before it, so earlier cards keep a visible top edge as the deck builds. */
+.shareStack {
+  /* Clears the sticky navbar (60px bar + 1px rule) with breathing room. */
+  --share-stack-top: 82px;
+  position: relative;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.shareCard {
+  position: sticky;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  min-height: 186px;
+  margin-bottom: 92px;
+  padding: 26px 22px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #fefcf9 100%);
+  border: 1px solid var(--e-line-base);
+  /* Scaled from the top edge so the parked edge never drifts. */
+  transform-origin: 50% 0%;
+  box-shadow:
+    inset 0 1px 0 var(--e-sheen),
+    var(--elev-2);
+}
+
+.shareCard:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 760px) {
+  .shareStack {
+    --share-stack-top: 92px;
+  }
+
+  .shareCard {
+    grid-template-columns: 96px 1fr;
+    gap: 32px;
+    align-items: start;
+    min-height: 208px;
+    padding: 34px 40px 26px;
+    border-radius: 28px;
+  }
+}
+
+.shareCardAside {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+@media (min-width: 760px) {
+  .shareCardAside {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 18px;
   }
 }
 
-/* ── Ways to share: icon-led hairline rows ── */
-
-.shareList {
-  display: grid;
-  gap: 0 56px;
-}
-
-.shareRow {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 16px;
-  padding: 22px 0;
-  border-top: 1px solid var(--card-edge);
-}
-
-.shareGlyph {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--surface);
-  border: 1px solid var(--card-edge);
+.shareCardGlyph {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-dim);
+  background: linear-gradient(180deg, var(--e-paper-top) 0%, var(--e-paper-bottom) 100%);
+  border: 1px solid var(--e-line);
+  border-bottom-color: var(--e-line-base);
+  box-shadow:
+    inset 0 1px 0 var(--e-sheen),
+    var(--elev-1);
 }
 
-@media (min-width: 860px) {
-  .shareList {
+/* The card's own quiet identity cue. */
+.shareCardBig {
+  font-size: 40px;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: rgba(23, 19, 17, 0.11);
+}
+
+@media (min-width: 760px) {
+  .shareCardBig {
+    font-size: 58px;
+  }
+}
+
+.shareCardBody {
+  min-width: 0;
+}
+
+.shareCardTitle {
+  font-size: 21px;
+  line-height: 1.25;
+  margin: 0 0 10px;
+}
+
+@media (min-width: 760px) {
+  .shareCardTitle {
+    font-size: 26px;
+  }
+}
+
+.shareCardCopy {
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--text-dim);
+  margin: 0;
+  max-width: 46ch;
+}
+
+/* ── The closing summary: every method on one card ── */
+
+.shareSummary {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.shareSummaryGrid {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 18px 30px;
+}
+
+@media (min-width: 760px) {
+  .shareSummaryGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 22px 36px;
+  }
+}
+
+.shareSummaryItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 13px;
+  align-items: start;
+}
+
+.shareSummaryGlyph {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  background: linear-gradient(180deg, var(--e-paper-top) 0%, var(--e-paper-bottom) 100%);
+  border: 1px solid var(--e-line);
+  box-shadow: var(--elev-1);
+}
+
+.shareSummaryGlyph svg {
+  width: 17px;
+  height: 17px;
+}
+
+.shareSummaryTitle {
+  font-size: 15px;
+  line-height: 1.3;
+  margin: 0 0 3px;
+}
+
+.shareSummaryCopy {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+/* Reduced motion: the deck stops overlapping and simply reads as a list. */
+@media (prefers-reduced-motion: reduce) {
+  .shareCard {
+    position: static;
+    margin-bottom: 20px;
+    transform: none;
   }
 }
 
@@ -408,10 +1238,28 @@
   margin-bottom: 64px;
 }
 
+/* A small soft plate under the check — enough to give the four points a
+   shared visual anchor without turning any of them into a card. */
 .pointMark {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
   color: var(--ok);
-  margin-bottom: 8px;
+  background: linear-gradient(180deg, var(--e-paper-top) 0%, var(--e-paper-bottom) 100%);
+  border: 1px solid var(--e-line);
+  border-bottom-color: var(--e-line-base);
+  box-shadow:
+    inset 0 1px 0 var(--e-sheen),
+    var(--elev-1);
+  margin-bottom: 12px;
+}
+
+.pointMark svg {
+  width: 17px;
+  height: 17px;
 }
 
 @media (min-width: 700px) {
@@ -428,18 +1276,39 @@
 
 .lanes {
   display: grid;
-  gap: 48px;
+  gap: 88px;
 }
 
 .lane {
   min-width: 0;
+  border-radius: 20px;
+  padding: 18px 16px 22px;
+  margin: -18px -16px -22px;
 }
 
+/* Left — the ordinary hosted service. Muted paper, very slightly recessed
+   into the page, no lift. Deliberately unremarkable. */
+.laneHosted {
+  background: #f2ece2;
+  border: 1px solid var(--e-line);
+  box-shadow: inset 0 1px 2px rgba(38, 28, 20, 0.05);
+}
+
+/* Right — Byzcard. The same ink surface as the real card, lifted clear of
+   the page so the eye lands here first. */
 .laneByz {
-  background: radial-gradient(120% 120% at 50% 0%, rgba(29, 41, 66, 0.45) 0%, transparent 70%);
-  border-radius: 20px;
-  padding: 4px 18px 12px;
-  margin: -4px -18px -12px;
+  background: var(--ink-face);
+  border: 1px solid var(--ink-border);
+  border-top-color: var(--ink-border-top);
+  border-bottom-color: var(--ink-border-bottom);
+  box-shadow: var(--ink-inner), var(--ink-thickness-3), var(--ink-lift-3);
+}
+
+@media (min-width: 860px) {
+  .lane {
+    padding: 22px 20px 26px;
+    margin: -22px -20px -26px;
+  }
 }
 
 .laneHead {
@@ -455,10 +1324,12 @@
   margin: 0 0 22px;
 }
 
+/* White on ink: the pill has to stay unmistakable against the dark panel. */
 .laneHeadByz {
   color: #0b1220;
-  background: var(--accent);
-  border-color: var(--accent);
+  background: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
 }
 
 .laneList {
@@ -498,14 +1369,73 @@
   border: 1.5px solid var(--label);
 }
 
+/* Hosted: a dashed, indirect rail with hollow nodes. */
+.laneHosted .laneList::before {
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(23, 19, 17, 0.42) 0 4px,
+    rgba(23, 19, 17, 0) 4px 9px
+  );
+}
+
+.laneHosted .laneItem::before {
+  background: #f2ece2;
+  border-color: rgba(23, 19, 17, 0.3);
+}
+
+/* The two steps that happen inside the service, banded together. The rail
+   runs straight through the band — that band is the middle. */
+.laneItemVia {
+  background: linear-gradient(
+    90deg,
+    rgba(23, 19, 17, 0) 0 22px,
+    rgba(23, 19, 17, 0.075) 22px calc(100% - 18px),
+    rgba(23, 19, 17, 0) calc(100% - 18px)
+  );
+}
+
+.laneItemViaStart {
+  border-top: 1px dashed rgba(23, 19, 17, 0.34);
+}
+
+.laneItemViaEnd {
+  border-bottom: 1px dashed rgba(23, 19, 17, 0.34);
+}
+
+/* The service node itself reads as the handover point. */
+.laneItemVia::before {
+  width: 13px;
+  height: 13px;
+  left: 1px;
+  border-style: dashed;
+  border-color: rgba(23, 19, 17, 0.42);
+}
+
+/* Byzcard: one unbroken, lit rail — nothing sits between the ends. */
+.laneByz .laneList::before {
+  width: 2px;
+  left: 6px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(214, 230, 255, 0.6) 18%,
+    rgba(214, 230, 255, 0.6) 82%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  box-shadow: 0 0 12px rgba(170, 200, 255, 0.35);
+}
+
 .laneByz .laneItem {
-  color: var(--text);
+  color: #ffffff;
   font-weight: 550;
 }
 
 .laneByz .laneItem::before {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: #ffffff;
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.14),
+    0 0 14px rgba(180, 208, 255, 0.75);
 }
 
 .laneNote {
@@ -552,6 +1482,31 @@
   }
 }
 
+/* ── Feature card: one white surface lifting a whole feature off the
+   cream page. Outer container only — nothing inside it is restyled. ── */
+.featureCard {
+  background: linear-gradient(180deg, #ffffff 0%, #fefcf9 100%);
+  border: 1px solid var(--e-line-base);
+  border-radius: 26px;
+  padding: 36px 22px;
+  box-shadow:
+    inset 0 1px 0 var(--e-sheen),
+    var(--elev-2);
+}
+
+@media (min-width: 700px) {
+  .featureCard {
+    border-radius: 30px;
+    padding: 52px 40px;
+  }
+}
+
+@media (min-width: 960px) {
+  .featureCard {
+    padding: 60px 44px;
+  }
+}
+
 /* ── Print section ── */
 
 .printGrid {
@@ -568,28 +1523,48 @@
   gap: 26px;
 }
 
+/* A wallet-sized card lying on the page: tight contact shadow, a hard 1px
+   edge for stock thickness, then a shallow warm ambient pool. */
 .mockCr80 {
   width: min(320px, 86vw);
   aspect-ratio: 3.375 / 2.125;
-  background: var(--card);
-  border: 1px solid var(--card-edge);
+  background: var(--ink-face);
+  border: 1px solid var(--ink-border);
+  border-top-color: var(--ink-border-top);
+  border-bottom-color: var(--ink-border-bottom);
   border-radius: 10px;
   padding: 14px 16px;
   display: flex;
   gap: 12px;
+  box-shadow:
+    var(--ink-inner),
+    var(--ink-thickness-2),
+    0 4px 7px -2px rgba(24, 16, 10, 0.22),
+    0 14px 24px -8px rgba(24, 16, 10, 0.24),
+    0 34px 50px -26px rgba(38, 26, 16, 0.38);
 }
 
+/* The 4 × 6 badge is a taller, heavier object — its shadow drops further
+   and pools tighter beneath it than the flat CR80 card's. */
 .mockBadge {
   width: min(190px, 60vw);
   aspect-ratio: 4 / 6;
-  background: var(--card);
-  border: 1px solid var(--card-edge);
+  background: var(--ink-face);
+  border: 1px solid var(--ink-border);
+  border-top-color: var(--ink-border-top);
+  border-bottom-color: var(--ink-border-bottom);
   border-radius: 10px;
   padding: 16px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-shadow:
+    var(--ink-inner),
+    var(--ink-thickness-2),
+    0 5px 8px -2px rgba(24, 16, 10, 0.24),
+    0 20px 30px -8px rgba(24, 16, 10, 0.26),
+    0 48px 66px -30px rgba(38, 26, 16, 0.42);
 }
 
 .mockLabel {
@@ -610,6 +1585,23 @@
   font-size: 10px;
   color: var(--text-dim);
   margin: 2px 0 0;
+}
+
+/* The badge sheet prints pronouns beside the name and the headline under
+   the role — the preview mirrors that, at preview scale. */
+.mockPronouns {
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-left: 5px;
+  white-space: nowrap;
+}
+
+.mockHeadline {
+  font-size: 9px;
+  line-height: 1.4;
+  opacity: 0.85;
+  margin: 3px 0 0;
 }
 
 .mockQr {
@@ -671,9 +1663,190 @@
 
 @media (min-width: 960px) {
   .printGrid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.12fr 0.88fr;
     gap: 64px;
   }
+}
+
+/* ── FAQ: one white panel, hairline-divided rows ── */
+
+.faqGrid {
+  display: grid;
+  gap: 34px;
+}
+
+@media (min-width: 960px) {
+  .faqGrid {
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 64px;
+    align-items: start;
+  }
+}
+
+.faqPanel {
+  background: linear-gradient(180deg, #ffffff 0%, #fefcf9 100%);
+  border: 1px solid var(--e-line-base);
+  border-radius: 22px;
+  padding: 2px 20px;
+  box-shadow:
+    inset 0 1px 0 var(--e-sheen),
+    var(--elev-2);
+}
+
+@media (min-width: 700px) {
+  .faqPanel {
+    padding: 2px 28px;
+  }
+}
+
+.faqItem + .faqItem {
+  border-top: 1px solid var(--e-line);
+}
+
+.faqSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  min-height: 48px;
+  padding: 19px 0;
+  cursor: pointer;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  font: inherit;
+}
+
+.faqSummary:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.faqQuestion {
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+}
+
+.faqSummary:hover .faqQuestion {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Plus when closed, minus when open — drawn in CSS, no icon asset. */
+.faqIcon {
+  position: relative;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--e-line-base);
+  background: linear-gradient(180deg, var(--e-paper-top) 0%, var(--e-paper-bottom) 100%);
+  box-shadow: var(--elev-1);
+  color: var(--text);
+}
+
+.faqIcon::before,
+.faqIcon::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.faqIcon::before {
+  left: 7px;
+  right: 7px;
+  top: 11.5px;
+  height: 1.8px;
+}
+
+.faqIcon::after {
+  top: 7px;
+  bottom: 7px;
+  left: 11.5px;
+  width: 1.8px;
+}
+
+.faqIconOpen::after {
+  display: none;
+}
+
+/* The animated region: Motion drives its height, so it must clip. */
+.faqPanelBody {
+  overflow: hidden;
+}
+
+.faqAnswer {
+  margin: -2px 0 20px;
+  padding-right: 42px;
+  max-width: 62ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ── Open source: the resting word flips ── */
+
+/* An ink plate the width of the current word. The plate is what makes the
+   change register; the word inside travels through it. */
+.flipContainer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  vertical-align: baseline;
+  background: linear-gradient(168deg, #16213a 0%, #0b1220 100%);
+  color: #f7f3ec;
+  border: 1px solid #2a3a5e;
+  border-radius: 0.26em;
+  padding: 0.1em 0.26em 0.16em;
+  margin: 0 0.04em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 1px 2px rgba(24, 16, 10, 0.18),
+    0 8px 18px -8px rgba(24, 16, 10, 0.34);
+}
+
+.flipWord {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+
+/* Reduced motion keeps the plate — only the cycling stops. */
+.flipStatic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: baseline;
+  background: linear-gradient(168deg, #16213a 0%, #0b1220 100%);
+  color: #f7f3ec;
+  border: 1px solid #2a3a5e;
+  border-radius: 0.26em;
+  padding: 0.1em 0.26em 0.16em;
+  margin: 0 0.04em;
+}
+
+/* The hero plate is warm-white so it reads as part of the cream heading,
+   unlike the ink plate the Open Source section uses. */
+.flipPlateLight {
+  /* As a flex item the plate must never shrink below its word, or the
+     overflow-clipped container cuts the last character off. */
+  flex: none;
+  padding: 0.08em 0.17em 0.14em;
+  margin: 0 0.03em;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 252, 247, 0.88) 100%);
+  color: var(--text);
+  border-color: rgba(23, 19, 17, 0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(38, 28, 20, 0.05),
+    0 8px 20px -12px rgba(38, 28, 20, 0.18);
 }
 
 /* ── Open source: light inline treatment ── */
@@ -704,9 +1877,22 @@
   text-align: center;
 }
 
+/* The closing pair reads as one continuous section: the idea leads straight
+   into the CTA, so the idea block gives up its bottom padding and the CTA
+   carries one measured gap instead. */
+.closingIdea {
+  padding-bottom: 0;
+}
+
 .finalCta {
   text-align: center;
-  padding: 88px 0 96px;
+  padding: 56px 0 96px;
+}
+
+@media (min-width: 960px) {
+  .finalCta {
+    padding-top: 88px;
+  }
 }
 
 .ctaCompact {
@@ -723,45 +1909,114 @@
 
 /* ── Footer ── */
 
+/* The footer is cream: the dark card sits inside it, never touching the
+   viewport edges on any side. */
 .footer {
-  border-top: 1px solid var(--card-edge);
-  padding: 44px 0 56px;
+  background: var(--bg);
+  padding: 8px 0 14px;
 }
 
-.footerGrid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 28px;
+@media (min-width: 700px) {
+  .footer {
+    padding: 16px 0 18px;
+  }
 }
 
-.footerTag {
-  font-size: 14px;
-  color: var(--text-dim);
-  margin: 10px 0 0;
+/* The footer card runs wider than the text column so it sits close to the
+   page edges, while a cream frame always stays visible around it. */
+.footerShell {
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 0 12px;
 }
 
+@media (min-width: 700px) {
+  .footerShell {
+    padding: 0 16px;
+  }
+}
+
+/* One deep-ink card, the same navy family as the Byzcard card itself. Text
+   tokens are re-pinned so everything inherited reads warm-ivory-on-navy. */
+.footerCard {
+  --text: #f7f3ec;
+  --text-dim: rgba(247, 243, 236, 0.68);
+  --label: rgba(247, 243, 236, 0.6);
+  background: linear-gradient(168deg, #141e37 0%, #0c1424 52%, #080d18 100%);
+  border: 1px solid #26324e;
+  border-top-color: #3e4c70;
+  border-bottom-color: #121a2b;
+  border-radius: 26px;
+  color: var(--text);
+  padding: 40px 24px 30px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    0 2px 4px rgba(24, 16, 10, 0.1),
+    0 16px 30px -12px rgba(24, 16, 10, 0.18),
+    0 44px 70px -34px rgba(38, 26, 16, 0.34);
+}
+
+@media (min-width: 700px) {
+  .footerCard {
+    border-radius: 34px;
+    padding: 64px 48px 46px;
+  }
+}
+
+@media (min-width: 960px) {
+  .footerCard {
+    padding: 82px 64px 54px;
+  }
+}
+
+/* Footer navigation lives under the brand signature, as a row on desktop. */
 .footerLinks {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-top: 34px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(247, 243, 236, 0.14);
 }
 
 .footerLinks a {
-  color: var(--text-dim);
+  color: rgba(247, 243, 236, 0.86);
   text-decoration: none;
   font-size: 14px;
 }
 
 .footerLinks a:hover,
 .footerLinks a:focus-visible {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* The single brand moment. The lockup scales as one unit: the icon is sized
+   in em, so it never distorts or crops. */
+.footerMark {
+  margin: 0;
+  font-size: clamp(38px, 8.5vw, 88px);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1;
   color: var(--text);
 }
 
+.footerMark > span {
+  gap: 0.26em;
+}
+
+.footerMark svg {
+  width: 0.78em;
+  height: 0.78em;
+}
+
 .footerCopyright {
-  margin-top: 36px;
+  margin-top: 24px;
   font-size: 13px;
-  color: var(--label);
+  color: rgba(247, 243, 236, 0.62);
 }
 
 /* Smooth in-page anchor scrolling, honoring reduced motion. */
@@ -773,4 +2028,18 @@
 
 .anchorTarget {
   scroll-margin-top: 76px;
+}
+
+/* ── Dark mock cards inside the light shell ──
+   The print/recipient mocks keep their approved white-on-navy card look;
+   tokens are re-pinned so inherited text stays readable. */
+.mockCr80,
+.mockBadge,
+.recipientMock,
+.laneByz {
+  --text: #ffffff;
+  --text-dim: #ffffff;
+  --label: #ffffff;
+  --card-edge: #1d2942;
+  color: var(--text);
 }

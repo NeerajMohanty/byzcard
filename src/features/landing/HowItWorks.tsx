@@ -1,5 +1,10 @@
 import styles from "./landing.module.css";
-import { DemoSequence } from "./DemoSequence";
+import { ByzcardProductReel } from "./ByzcardProductReel";
+import { TypewriterHeading } from "./TypewriterHeading";
+import type { QrSymbol } from "@/core/qr";
+
+/** Typed one at a time; joined, they are the heading. */
+const HEADING = ["Meet.", "Scan.", "Save."] as const;
 
 const STEPS = [
   {
@@ -10,12 +15,12 @@ const STEPS = [
   {
     num: "02",
     title: "Keep it close",
-    copy: "Add BYZCARD to your Home Screen. Your card is one tap away when you need it.",
+    copy: "Add Byzcard to your Home Screen. Your card is one tap away when you need it.",
   },
   {
     num: "03",
     title: "Show your QR",
-    copy: "When you meet someone, open BYZCARD and show them your QR code. They scan it with their phone camera.",
+    copy: "When you meet someone, open Byzcard and show them your QR code. They scan it with their phone camera.",
   },
   {
     num: "04",
@@ -24,13 +29,13 @@ const STEPS = [
   },
 ] as const;
 
-export function HowItWorks() {
+export function HowItWorks({ qr }: { qr: QrSymbol }) {
   return (
     <section id="how-it-works" className={`${styles.section} ${styles.anchorTarget}`}>
       <div className={styles.container}>
         <div className={styles.sectionHead}>
           <p className={styles.sectionEyebrow}>How it works</p>
-          <h2 className={styles.sectionTitle}>Meet. Scan. Save.</h2>
+          <TypewriterHeading className={styles.sectionTitle} segments={HEADING} />
           <p className={styles.lede}>Sharing your card should take seconds.</p>
         </div>
         <div className={styles.stepsFlow}>
@@ -44,8 +49,8 @@ export function HowItWorks() {
             </div>
           ))}
         </div>
-        <p className={styles.noAppLine}>They don’t need BYZCARD installed.</p>
-        <DemoSequence />
+        <p className={styles.noAppLine}>They don’t need Byzcard installed.</p>
+        <ByzcardProductReel qr={qr} />
       </div>
     </section>
   );

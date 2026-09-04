@@ -3,18 +3,28 @@
  * Everything here stays on the device; corrupted data is detected via the
  * core type guards and treated as absent rather than crashing the app.
  */
-import type { Card, PhotoMeta, WalletIds } from "@/core/card/types";
+import {
+  clampPhotoCrop,
+  isPhotoCrop,
+  type Card,
+  type PhotoCrop,
+  type PhotoMeta,
+  type WalletIds,
+} from "@/core/card/types";
 import { isStoredCard } from "@/core/card/validate";
 import { kvClear, kvDelete, kvGet, kvSet, requestPersistentStorage } from "./db";
 
 const KEY_CARD = "card";
 const KEY_PHOTO_BYTES = "photoBytes";
 const KEY_PHOTO_META = "photoMeta";
+const KEY_PHOTO_CROP = "photoCrop";
 const KEY_WALLET_IDS = "walletIds";
 
 export interface StoredPhoto {
   blob: Blob;
   meta: PhotoMeta;
+  /** Absent on cards saved before crop support existed. */
+  crop?: PhotoCrop;
 }
 
 export async function saveCard(card: Card): Promise<void> {
@@ -66,6 +76,8 @@ export async function savePhoto(photo: StoredPhoto): Promise<void> {
   const bytes = await blobToArrayBuffer(photo.blob);
   await kvSet(KEY_PHOTO_BYTES, bytes);
   await kvSet(KEY_PHOTO_META, photo.meta);
+  if (photo.crop !== undefined) await kvSet(KEY_PHOTO_CROP, clampPhotoCrop(photo.crop));
+  else await kvDelete(KEY_PHOTO_CROP);
 }
 
 /** Realm-safe ArrayBuffer check (IndexedDB clones can cross realms). */
@@ -79,12 +91,18 @@ export async function loadPhoto(): Promise<StoredPhoto | null> {
   const bytes = await kvGet(KEY_PHOTO_BYTES);
   const meta = await kvGet(KEY_PHOTO_META);
   if (!isArrayBuffer(bytes) || !isPhotoMeta(meta)) return null;
-  return { blob: new Blob([bytes], { type: meta.mimeType }), meta };
+  const crop = await kvGet(KEY_PHOTO_CROP);
+  return {
+    blob: new Blob([bytes], { type: meta.mimeType }),
+    meta,
+    ...(isPhotoCrop(crop) ? { crop: clampPhotoCrop(crop) } : {}),
+  };
 }
 
 export async function deletePhoto(): Promise<void> {
   await kvDelete(KEY_PHOTO_BYTES);
   await kvDelete(KEY_PHOTO_META);
+  await kvDelete(KEY_PHOTO_CROP);
 }
 
 function isWalletIds(value: unknown): value is WalletIds {

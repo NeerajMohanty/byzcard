@@ -1,16 +1,19 @@
 /* ── BYZCARD design tokens ──────────────────────────────────────────── */
 :root {
-  --bg: #05070d;
-  --surface: #0d1424;
+  /* Warm-light application shell. The business card itself stays dark:
+     card-scoped components re-pin the text tokens to their approved
+     white-on-navy values. */
+  --bg: #f7f3ec;
+  --surface: #fffdfc;
   --card: #0b1220;
-  --card-edge: #1d2942;
-  --text: #f4f6fb;
-  --text-dim: #94a3b8;
-  --label: #7c8aa5;
-  --accent: #e8eaf0;
-  --danger: #f87171;
-  --ok: #34d399;
-  --warn: #fbbf24;
+  --card-edge: #e4ded6;
+  --text: #171311;
+  --text-dim: #69635f;
+  --label: #6f6862;
+  --accent: #171311;
+  --danger: #b3261e;
+  --ok: #0f7a4d;
+  --warn: #8a6100;
   --radius-card: 18px;
   --radius-control: 12px;
 }
@@ -36,6 +39,22 @@ body {
   max-width: 480px;
   margin: 0 auto;
   padding: 16px 16px 48px;
+}
+
+/* Slim brand header on the app screens (create/card/recipient). */
+.app-header {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 16px 0;
+}
+
+.app-brand {
+  display: inline-flex;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.2em;
 }
 
 h1,
@@ -73,7 +92,9 @@ input {
   color: var(--label);
 }
 
-.field input {
+.field input,
+.field select,
+.control {
   background: var(--surface);
   border: 1px solid var(--card-edge);
   border-radius: var(--radius-control);
@@ -81,9 +102,12 @@ input {
   padding: 12px 14px;
   font-size: 16px; /* prevents iOS zoom-on-focus */
   width: 100%;
+  font: inherit;
 }
 
-.field input:focus-visible {
+.field input:focus-visible,
+.field select:focus-visible,
+.control:focus-visible {
   outline: 2px solid var(--text-dim);
   outline-offset: 1px;
 }
@@ -124,7 +148,7 @@ input {
 .btn-primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #0b1220;
+  color: var(--surface);
 }
 
 .btn-danger {
@@ -161,6 +185,51 @@ input {
 .status-error {
   color: var(--danger);
   font-size: 13px;
+}
+
+/* Lightweight disclosure rows for secondary card-page tools. */
+.disclosure-group {
+  margin-top: 26px;
+}
+
+.disclosure {
+  border-top: 1px solid var(--card-edge);
+}
+
+.disclosure-group .disclosure:last-child {
+  border-bottom: 1px solid var(--card-edge);
+}
+
+.disclosure-summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 13px 2px;
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.disclosure-summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosure-summary::after {
+  content: "▾";
+  color: var(--label);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.disclosure[open] > .disclosure-summary::after {
+  content: "▴";
+}
+
+.disclosure-body {
+  padding: 2px 0 18px;
 }
 
 .section-title {

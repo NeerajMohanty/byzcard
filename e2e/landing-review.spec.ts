@@ -48,7 +48,7 @@ test("capture landing screenshots (desktop)", async ({ page, isMobile }, testInf
   await page.locator("#privacy").scrollIntoViewIfNeeded();
   await page.screenshot({ path: shot("02-landing-middle-desktop") });
   await page
-    .getByRole("heading", { name: "Create your BYZCARD in a minute." })
+    .getByRole("heading", { name: "Create your Byzcard in a minute." })
     .scrollIntoViewIfNeeded();
   await page.screenshot({ path: shot("04-landing-final-cta-desktop") });
   await page.getByRole("contentinfo").scrollIntoViewIfNeeded();

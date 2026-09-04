@@ -2,7 +2,7 @@
  * Backup file format (.byzcard) — versioned, documented, locally generated.
  * A backup is plain JSON. Nothing in it is ever executed.
  */
-import type { Card, WalletIds } from "../card/types";
+import type { Card, PhotoCrop, WalletIds } from "../card/types";
 
 export const BACKUP_FORMAT = "byzcard-backup";
 export const BACKUP_SCHEMA_VERSION = 1;
@@ -27,6 +27,8 @@ export interface BackupFileV1 {
   exportedAt: string;
   card: Card;
   photo?: BackupPhotoV1;
+  /** Optional 4:5 framing; absent in backups from older versions. */
+  photoCrop?: PhotoCrop;
   walletIds?: WalletIds;
 }
 

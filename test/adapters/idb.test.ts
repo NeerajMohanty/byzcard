@@ -67,6 +67,22 @@ describe("IndexedDB card store", () => {
     expect(await loadPhoto()).toBeNull();
   });
 
+  it("persists the photo crop; saving without one clears it", async () => {
+    const blob = new Blob([new Uint8Array([1, 2, 3, 4])], { type: "image/jpeg" });
+    const meta = { mimeType: "image/jpeg", width: 512, height: 512, byteSize: 4 };
+    await savePhoto({ blob, meta, crop: { x: 0.4, y: -0.2, zoom: 1.6 } });
+    expect((await loadPhoto())?.crop).toEqual({ x: 0.4, y: -0.2, zoom: 1.6 });
+    await savePhoto({ blob, meta });
+    expect((await loadPhoto())?.crop).toBeUndefined();
+  });
+
+  it("clamps out-of-range crop values instead of storing them raw", async () => {
+    const blob = new Blob([new Uint8Array([1])], { type: "image/jpeg" });
+    const meta = { mimeType: "image/jpeg", width: 512, height: 512, byteSize: 1 };
+    await savePhoto({ blob, meta, crop: { x: 9, y: -9, zoom: 99 } });
+    expect((await loadPhoto())?.crop).toEqual({ x: 1, y: -1, zoom: 2.5 });
+  });
+
   it("persists wallet identifiers", async () => {
     expect(await loadWalletIds()).toEqual({});
     await saveWalletIds({ appleSerialNumber: "abc123", googleObjectSuffix: "abc123" });

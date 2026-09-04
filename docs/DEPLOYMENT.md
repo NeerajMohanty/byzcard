@@ -1,6 +1,6 @@
 # Deployment requirements
 
-BYZCARD has no deployment provider configured in this repository, and none
+Byzcard has no deployment provider configured in this repository, and none
 is required by the code — any host that runs a Next.js server works, with
 no lock-in. Before a **production** deployment with Wallet enabled, the
 items below are mandatory.
@@ -8,7 +8,7 @@ items below are mandatory.
 ## 1. Edge rate limiting for the Wallet endpoints (REQUIRED)
 
 `/api/apple-pass` and `/api/google-pass` are intentionally
-unauthenticated (BYZCARD has no accounts) and perform cryptographic work
+unauthenticated (Byzcard has no accounts) and perform cryptographic work
 per request. Application-level protections exist (origin allow-listing,
 strict Content-Type, body-size caps, schema validation before any signing)
 — but **they are not a rate limiter**, and a stateless serverless process
@@ -92,6 +92,6 @@ Operational settings:
   a preview on a phone, use the deployment's shareable link or relax
   protection for that deployment.
 - **Analytics**: leave Vercel Web Analytics and Speed Insights off —
-  BYZCARD ships no analytics or tracking.
+  Byzcard ships no analytics or tracking.
 - **Log drains**: do not attach any drain or integration that records
   request bodies (see section 4).

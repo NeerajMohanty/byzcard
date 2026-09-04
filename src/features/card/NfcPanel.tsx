@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { checkNdefFit, NFC_TAG_BUDGETS } from "@/core/ndef/build";
 import { webNfcSupported, writeNfcUrl, type NfcWriteOutcome } from "@/adapters/nfc/webNfc";
-import { isIos } from "@/lib/platform";
 import { useClientValue } from "@/lib/useClientValue";
 
 interface NfcPanelProps {
@@ -19,7 +18,6 @@ const OUTCOME_MESSAGES: Record<Exclude<NfcWriteOutcome, "written">, string> = {
 
 export function NfcPanel({ shareLink }: NfcPanelProps) {
   const supported = useClientValue<boolean | null>(webNfcSupported, null);
-  const ios = useClientValue(isIos, false);
   const [state, setState] = useState<"idle" | "writing" | "written" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -30,10 +28,8 @@ export function NfcPanel({ shareLink }: NfcPanelProps) {
   if (!supported) {
     return (
       <p className="note">
-        NFC tag writing is not available from this browser.{" "}
-        {ios
-          ? "iPhones cannot write NFC tags from any browser — use the QR code or Wallet pass to share instead. (iPhones can still read tags written elsewhere.)"
-          : "On Android, Chrome supports writing NFC tags. Sharing by QR and Wallet works everywhere."}
+        NFC tag writing isn’t available on this device or browser. You can still share your card
+        using the QR code.
       </p>
     );
   }

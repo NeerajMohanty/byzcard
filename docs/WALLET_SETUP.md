@@ -7,12 +7,12 @@ environment variables (inline PEM with `\n` escapes, or `*_FILE` paths).
 ## Apple Wallet
 
 > Only the deployment operator/self-hoster needs these credentials, and
-> only to enable the optional Apple Wallet button. Normal BYZCARD users
+> only to enable the optional Apple Wallet button. Normal Byzcard users
 > never need an Apple Developer account — the core product (Home Screen
 > install, QR, vCard, print, offline, backup) is fully independent of
 > Apple Wallet.
 
-Requirements (all from Apple; BYZCARD cannot remove any of them):
+Requirements (all from Apple; Byzcard cannot remove any of them):
 
 1. **Apple Developer Program** membership (paid, currently US$99/year).
 2. Register a **Pass Type ID** (e.g. `pass.com.yourdomain.byzcard`) in
@@ -77,7 +77,7 @@ Notes:
 - User issuance is stateless: each save JWT carries only the
   GenericObject referencing the pre-created class. No REST calls during
   normal use, no state.
-- `NEXT_PUBLIC_APP_URL` must be the exact origin serving BYZCARD — it is
+- `NEXT_PUBLIC_APP_URL` must be the exact origin serving Byzcard — it is
   placed in the JWT `origins` claim and Google rejects saves from other
   origins.
 - The pass carries no photo by design (Google requires hosted image URLs,

@@ -25,7 +25,10 @@ interface Computed {
  * while computing, or when the payload exceeds the hard budget (the size
  * is then reported via `oversize` for error display).
  */
-export function useShareQr(fields: CardFields | null): {
+export function useShareQr(
+  fields: CardFields | null,
+  origin?: string,
+): {
   state: ShareQrState | null;
   oversize: ShareSize | null;
 } {
@@ -33,7 +36,7 @@ export function useShareQr(fields: CardFields | null): {
 
   // Value-keyed so equal field values never recompute (object identity of
   // `fields` changes every editor keystroke).
-  const key = fields === null ? null : JSON.stringify(fields);
+  const key = fields === null ? null : JSON.stringify([fields, origin ?? null]);
 
   useEffect(() => {
     if (fields === null || key === null) return;
@@ -41,7 +44,7 @@ export function useShareQr(fields: CardFields | null): {
     void (async () => {
       const fragment = await encodeSharePayload(fields);
       if (cancelled) return;
-      const shareUrl = buildShareUrl(appOrigin(), fragment);
+      const shareUrl = buildShareUrl(origin ?? appOrigin(), fragment);
       const size = analyzeShareSize(shareUrl);
       if (size.level === "error") {
         setComputed({ key, state: null, oversize: size });

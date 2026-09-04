@@ -81,7 +81,7 @@ describe("SharePayloadV1 codec", () => {
   });
 
   it("rejects unsupported future versions", async () => {
-    const bytes = new TextEncoder().encode(JSON.stringify([2, "a", "b", "c", "d", "e"]));
+    const bytes = new TextEncoder().encode(JSON.stringify([3, "a", "b", "c", "d", "e"]));
     let b64 = "";
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
     // quick local base64url for the test

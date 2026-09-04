@@ -186,7 +186,7 @@ describe("Apple .pkpass builder", () => {
       string,
       unknown
     >;
-    expect(pass.organizationName).toBe("BYZCARD");
+    expect(pass.organizationName).toBe("Byzcard");
     expect(typeof pass.description).toBe("string");
     expect((pass.description as string).length).toBeGreaterThan(0);
     const barcodes = pass.barcodes as { messageEncoding: string; altText?: string }[];

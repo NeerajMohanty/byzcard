@@ -7,7 +7,9 @@
  *   - /api/* is NEVER cached (wallet signing responses are no-store)
  */
 
-const CACHE_NAME = "byzcard-v1";
+// Bump deliberately whenever shipped shell/branding assets change: activation
+// drops every older cache, so clients can never keep serving stale branding.
+const CACHE_NAME = "byzcard-v3";
 const APP_SHELL = ["/", "/create", "/card", "/s"];
 
 self.addEventListener("install", (event) => {

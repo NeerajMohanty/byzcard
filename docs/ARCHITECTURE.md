@@ -1,4 +1,4 @@
-# BYZCARD architecture
+# Byzcard architecture
 
 ## Zero-storage model
 
@@ -165,7 +165,7 @@ registration web service — those would require server state.
 
 ## Google Wallet
 
-Class lifecycle follows Google's production pattern: the BYZCARD
+Class lifecycle follows Google's production pattern: the Byzcard
 GenericClass (`{issuerId}.byzcard_v1`) is created **once** by the operator
 via `npm run wallet:google:setup` (a self-contained Node tool — service
 account JWT-bearer auth + the Wallet REST API, no SDK; idempotent, treats
@@ -177,7 +177,7 @@ GenericObject** (title, name, role, text modules, links, QR barcode)
 referencing the pre-created `classId` → RS256-sign with the
 service-account key via `node:crypto` → return
 `https://pay.google.com/gp/v/save/<jwt>` → discard. No class is ever
-(re)created per user, and BYZCARD keeps zero state.
+(re)created per user, and Byzcard keeps zero state.
 
 **No photo on the Google pass**: Google Wallet images must be fetched by
 Google from hosted HTTPS URLs (data URIs unsupported; "secure private
@@ -195,10 +195,10 @@ limitation, not a bug.
   HTTPS + foreground + user gesture required; feature-detected, typed via
   a local ambient declaration (no `any`).
 - **iPhone**: no browser exposes NFC writing; the UI says exactly that and
-  the rest of the product is unaffected. iPhones _read_ BYZCARD tags fine
+  the rest of the product is unaffected. iPhones _read_ Byzcard tags fine
   (background tag reading).
 - **No phone-to-phone NFC** — not possible from the web on any platform;
-  BYZCARD does not claim otherwise. Web Share/AirDrop of the link is the
+  Byzcard does not claim otherwise. Web Share/AirDrop of the link is the
   honest equivalent.
 
 ## Security

@@ -1,13 +1,15 @@
 /**
- * On-device photo processing: validate → decode → center-crop square →
- * resize → compress. Nothing is uploaded; output is a Blob for IndexedDB.
+ * On-device photo processing: validate → decode → resize → compress.
+ * The stored photo keeps its aspect ratio so the user's crop/reposition
+ * can reach every part of the original. Nothing is uploaded; output is a
+ * Blob for IndexedDB.
  */
 import type { PhotoMeta } from "@/core/card/types";
 
 export const PHOTO_MAX_SOURCE_BYTES = 10 * 1024 * 1024;
 export const PHOTO_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
-/** Stored photo edge (square). */
-const TARGET_SIZE = 512;
+/** Longest stored edge — enough headroom for 2.5× zoom in the 4:5 frame. */
+const STORAGE_MAX_EDGE = 800;
 /** Apple Wallet thumbnail edge (90pt @3x). */
 const WALLET_PNG_SIZE = 270;
 const JPEG_QUALITY = 0.85;
@@ -60,6 +62,24 @@ function drawSquare(
   return canvas;
 }
 
+/** Aspect-preserving downscale (no crop): longest edge ≤ maxEdge. */
+function drawScaled(
+  source: ImageBitmap | HTMLImageElement,
+  maxEdge: number,
+): HTMLCanvasElement | null {
+  const width = source.width;
+  const height = source.height;
+  if (width < 1 || height < 1) return null;
+  const scale = Math.min(1, maxEdge / Math.max(width, height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(width * scale));
+  canvas.height = Math.max(1, Math.round(height * scale));
+  const context = canvas.getContext("2d");
+  if (context === null) return null;
+  context.drawImage(source, 0, 0, width, height, 0, 0, canvas.width, canvas.height);
+  return canvas;
+}
+
 function canvasToBlob(
   canvas: HTMLCanvasElement,
   type: string,
@@ -77,7 +97,7 @@ export async function processPhoto(file: File): Promise<PhotoResult> {
 
   const source = await decodeImage(file);
   if (source === null) return { ok: false, error: "decode-failed" };
-  const canvas = drawSquare(source, TARGET_SIZE);
+  const canvas = drawScaled(source, STORAGE_MAX_EDGE);
   if (source instanceof ImageBitmap) source.close();
   if (canvas === null) return { ok: false, error: "process-failed" };
 

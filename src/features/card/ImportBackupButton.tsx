@@ -31,7 +31,11 @@ export function ImportBackupButton({ label, onRestored }: ImportBackupButtonProp
       <input
         ref={inputRef}
         type="file"
-        accept=".byzcard,application/json"
+        // Deliberately NO accept filter: iOS/mobile pickers grey out files
+        // whose custom .byzcard extension maps to no known type, making a
+        // valid backup unselectable. The strict content parser — format id,
+        // schema version, size caps, full card validation — is the real
+        // security boundary, so any file may be chosen and then validated.
         className="visually-hidden"
         aria-label="Import a .byzcard backup file"
         onChange={(event) => void handleImport(event.target.files?.[0])}

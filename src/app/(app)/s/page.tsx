@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { RecipientScreen } from "@/features/recipient/RecipientScreen";
 
 export const metadata: Metadata = {
-  title: "Business card — BYZCARD",
+  title: "Business card — Byzcard",
   robots: { index: false },
 };
 

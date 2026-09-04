@@ -6,10 +6,11 @@
  * The dynamic @page rule gives the browser's Save-as-PDF the exact
  * physical page size for the selected format.
  */
-import type { Card } from "@/core/card/types";
-import { displayUrl } from "@/core/card/types";
+import type { Card, PhotoCrop } from "@/core/card/types";
+import { displayName, displayUrl } from "@/core/card/types";
 import type { QrSymbol } from "@/core/qr";
 import { Avatar } from "@/components/Avatar";
+import { BrandMark } from "@/components/BrandMark";
 import { QrSvg } from "@/components/QrSvg";
 import styles from "./print.module.css";
 
@@ -24,15 +25,17 @@ interface SheetProps {
   card: Card;
   photoUrl: string | null;
   qr: QrSymbol;
+  photoCrop?: PhotoCrop;
+  photoAspect?: number;
 }
 
 /** Standard ID card — CR80 landscape (wallet/PVC/cardstock). */
-function Cr80Sheet({ card, photoUrl, qr }: SheetProps) {
+function Cr80Sheet({ card, photoUrl, qr, photoCrop, photoAspect }: SheetProps) {
   return (
     <div className={styles.cr80} data-print-format="cr80">
       <div className={styles.cr80Left}>
         <p className={styles.cr80Role}>{card.role}</p>
-        <p className={styles.cr80Name}>{card.fullName}</p>
+        <p className={styles.cr80Name}>{displayName(card)}</p>
         <p className={styles.cr80Company}>{card.company}</p>
         <div className={styles.cr80Contact}>
           <div>
@@ -51,10 +54,18 @@ function Cr80Sheet({ card, photoUrl, qr }: SheetProps) {
             </p>
           </div>
         </div>
-        <p className={styles.cr80Brand}>BYZCARD</p>
+        <p className={styles.cr80Brand}>
+          <BrandMark iconSize={9} />
+        </p>
       </div>
       <div className={styles.cr80Right}>
-        <Avatar fullName={card.fullName} photoUrl={photoUrl} size={50} />
+        <Avatar
+          fullName={card.fullName}
+          photoUrl={photoUrl}
+          size={50}
+          crop={photoCrop}
+          aspect={photoAspect}
+        />
         <div className={styles.cr80Qr}>
           <QrSvg symbol={qr} label="QR code linking to this business card" padding={8} />
         </div>
@@ -64,13 +75,32 @@ function Cr80Sheet({ card, photoUrl, qr }: SheetProps) {
 }
 
 /** Event badge — 4 × 6 in portrait, identity-at-a-distance layout. */
-function BadgeSheet({ card, photoUrl, qr }: SheetProps) {
+function BadgeSheet({ card, photoUrl, qr, photoCrop, photoAspect }: SheetProps) {
   return (
     <div className={styles.badge} data-print-format="badge">
-      <p className={styles.badgeBrandTop}>BYZCARD</p>
-      <Avatar fullName={card.fullName} photoUrl={photoUrl} size={128} />
-      <p className={styles.badgeName}>{card.fullName}</p>
+      <p className={styles.badgeBrandTop}>
+        <BrandMark iconSize={14} />
+      </p>
+      <Avatar
+        fullName={card.fullName}
+        photoUrl={photoUrl}
+        size={112}
+        crop={photoCrop}
+        aspect={photoAspect}
+      />
+      <p className={styles.badgeName}>
+        {displayName(card)}
+        {card.pronouns !== undefined && (
+          <span style={{ fontSize: "11pt", fontWeight: 500, opacity: 0.85 }}>
+            {" "}
+            ({card.pronouns})
+          </span>
+        )}
+      </p>
       <p className={styles.badgeRole}>{card.role}</p>
+      {card.headline !== undefined && (
+        <p style={{ fontSize: "9pt", margin: "0.04in 0 0", opacity: 0.85 }}>{card.headline}</p>
+      )}
       <p className={styles.badgeCompany}>{card.company}</p>
       <div className={styles.badgeQr}>
         <QrSvg symbol={qr} label="QR code linking to this business card" padding={14} />
@@ -85,19 +115,25 @@ interface PrintSheetsProps {
   card: Card;
   photoUrl: string | null;
   qr: QrSymbol | null;
+  photoCrop?: PhotoCrop;
+  photoAspect?: number;
 }
 
 /** Rendered outside the screen UI; visible only under `@media print`. */
-export function PrintSheets({ format, card, photoUrl, qr }: PrintSheetsProps) {
+export function PrintSheets({
+  format,
+  card,
+  photoUrl,
+  qr,
+  photoCrop,
+  photoAspect,
+}: PrintSheetsProps) {
   if (qr === null) return null;
+  const sheet = { card, photoUrl, qr, photoCrop, photoAspect };
   return (
     <div className="printOnly">
       <style>{`@page { size: ${PRINT_PAGE_SIZES[format]}; margin: 0; }`}</style>
-      {format === "cr80" ? (
-        <Cr80Sheet card={card} photoUrl={photoUrl} qr={qr} />
-      ) : (
-        <BadgeSheet card={card} photoUrl={photoUrl} qr={qr} />
-      )}
+      {format === "cr80" ? <Cr80Sheet {...sheet} /> : <BadgeSheet {...sheet} />}
     </div>
   );
 }

@@ -50,6 +50,7 @@ export async function makeBackupFile(
     {
       card,
       photo: backupPhoto,
+      photoCrop: photo?.crop,
       walletIds: Object.keys(walletIds).length > 0 ? walletIds : undefined,
     },
     new Date().toISOString(),
@@ -77,6 +78,7 @@ export async function restoreFromBackup(file: File): Promise<RestoreResult> {
             height: parsed.backup.photo.height,
             byteSize: blob.size,
           },
+          ...(parsed.backup.photoCrop !== undefined ? { crop: parsed.backup.photoCrop } : {}),
         });
       }
     }
@@ -88,10 +90,10 @@ export async function restoreFromBackup(file: File): Promise<RestoreResult> {
 }
 
 export const RESTORE_ERROR_MESSAGES: Record<BackupParseError | "storage", string> = {
-  "too-large": "That file is too large to be a BYZCARD backup.",
-  "not-json": "That file is not a readable BYZCARD backup.",
-  "not-backup": "That file is not a BYZCARD backup.",
-  "unsupported-version": "This backup was made by a newer BYZCARD version.",
+  "too-large": "That file is too large to be a Byzcard backup.",
+  "not-json": "That file is not a readable Byzcard backup.",
+  "not-backup": "That file is not a Byzcard backup.",
+  "unsupported-version": "This backup was made by a newer Byzcard version.",
   "invalid-card": "The backup's card data is damaged and cannot be imported.",
   "invalid-photo": "The backup's photo data is damaged and cannot be imported.",
   storage: "This browser is blocking local storage, so the backup could not be restored.",

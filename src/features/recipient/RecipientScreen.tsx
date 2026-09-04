@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { displayUrl } from "@/core/card/types";
-import { decodeSharePayload, type SharePayloadV1, type ShareDecodeError } from "@/core/share/codec";
+import {
+  displayName,
+  displayUrl,
+  linkEntryLabel,
+  type LinkEntry,
+  type LinkGroup,
+} from "@/core/card/types";
+import { decodeSharePayload, type SharePayload, type ShareDecodeError } from "@/core/share/codec";
 import { buildVcard, vcardFilename } from "@/core/vcard/build";
 import { shareOrDownloadFile } from "@/adapters/share/webShare";
 import { Avatar } from "@/components/Avatar";
@@ -11,14 +17,20 @@ import styles from "./RecipientScreen.module.css";
 
 type State =
   | { kind: "loading" }
-  | { kind: "ready"; payload: SharePayloadV1 }
+  | { kind: "ready"; payload: SharePayload }
   | { kind: "error"; error: ShareDecodeError };
+
+/** Populated optional entries flattened as (group, entry) action rows. */
+function optionalActions(payload: SharePayload): { group: LinkGroup; entry: LinkEntry }[] {
+  const groups: LinkGroup[] = ["social", "messaging", "links"];
+  return groups.flatMap((group) => (payload[group] ?? []).map((entry) => ({ group, entry })));
+}
 
 const ERROR_MESSAGES: Record<ShareDecodeError, string> = {
   empty: "This link does not contain a card. Ask the sender to share it again.",
   format: "This card link is damaged or incomplete. Ask the sender to share it again.",
   "unsupported-version":
-    "This card was made with a newer BYZCARD version. Update or open on another device.",
+    "This card was made with a newer Byzcard version. Update or open on another device.",
   "decompress-unavailable": "This browser is too old to open this card. Try a current browser.",
   "invalid-fields": "This card link is damaged or incomplete. Ask the sender to share it again.",
 };
@@ -47,7 +59,7 @@ export function RecipientScreen() {
         <h1 style={{ fontSize: 20 }}>Couldn’t open this card</h1>
         <p className="note">{ERROR_MESSAGES[state.error]}</p>
         <Link className="btn" href="/" style={{ marginTop: 16 }}>
-          What is BYZCARD?
+          What is Byzcard?
         </Link>
       </div>
     );
@@ -66,8 +78,14 @@ export function RecipientScreen() {
         <div className={styles.top}>
           <Avatar fullName={card.fullName} photoUrl={null} size={76} />
           <div className={styles.identity}>
-            <h1 className={styles.name}>{card.fullName}</h1>
+            <h1 className={styles.name}>
+              {displayName(card)}
+              {card.pronouns !== undefined && (
+                <span className={styles.pronouns}>({card.pronouns})</span>
+              )}
+            </h1>
             <p className={styles.role}>{card.role}</p>
+            {card.headline !== undefined && <p className={styles.headline}>{card.headline}</p>}
             <p className={styles.company}>{card.company}</p>
           </div>
         </div>
@@ -113,11 +131,22 @@ export function RecipientScreen() {
         <a className="btn" href={`mailto:${card.email}`}>
           Email
         </a>
+        {optionalActions(card).map(({ group, entry }) => (
+          <a
+            key={`${group}-${entry.service}-${entry.value}`}
+            className="btn"
+            href={entry.value}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {linkEntryLabel(group, entry)}
+          </a>
+        ))}
       </div>
 
       <p className="note" style={{ marginTop: 20, textAlign: "center" }}>
         This card was decoded on your device from the link itself — nothing was looked up on a
-        server. <Link href="/">Create your own BYZCARD</Link>
+        server. <Link href="/">Create your own Byzcard</Link>
       </p>
     </div>
   );

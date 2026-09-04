@@ -1,10 +1,43 @@
 .card {
+  /* The card keeps its approved dark treatment inside the light shell:
+     re-pin the tokens so descendants stay white-on-navy. */
+  --text: #ffffff;
+  --text-dim: #ffffff;
+  --label: #ffffff;
+  --card-edge: #1d2942;
   background: linear-gradient(160deg, #0e1730 0%, #0b1220 55%, #0a101c 100%);
   border: 1px solid var(--card-edge);
   border-radius: var(--radius-card);
   padding: 20px 20px 22px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
   color: var(--text);
+}
+
+.pronouns {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  opacity: 0.8;
+  margin-left: 7px;
+  white-space: nowrap;
+}
+
+.headline {
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 4px 0 0;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+}
+
+.linkChips {
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0.8;
+  margin: 0 0 8px;
 }
 
 .label {

@@ -1,11 +1,12 @@
-"use client";
-
 import { CardView } from "./CardView";
-import { useShareQr } from "@/lib/useShareQr";
+import type { QrSymbol } from "@/core/qr";
 import { EXAMPLE_CARD } from "@/features/landing/exampleData";
 
-/** The landing-page example card — its QR is real and generated locally. */
-export function ExampleCard() {
-  const { state } = useShareQr(EXAMPLE_CARD);
-  return <CardView fields={EXAMPLE_CARD} photoUrl={null} qr={state?.qr ?? null} />;
+/**
+ * The landing-page example card. The QR is precomputed on the server
+ * (features/landing/exampleQr) and passed in, so rendering this card does no
+ * QR work and its dimensions are final from the first paint.
+ */
+export function ExampleCard({ qr }: { qr: QrSymbol }) {
+  return <CardView fields={EXAMPLE_CARD} photoUrl={null} qr={qr} />;
 }

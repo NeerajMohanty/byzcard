@@ -1,27 +1,29 @@
-# BYZCARD
+# Byzcard
 
 **Your next introduction doesn’t need another app.**
 
 A mobile-first digital business card that lives on your phone.
 
+**[Try Byzcard](https://byzcard.cc)** · **[View source](https://github.com/NeerajMohanty/byzcard)**
+
 - Card creation, editing, photo processing, QR generation, vCard generation,
   NFC payload generation, backup export/import, printing, and offline use
   all happen **in the browser, on the device**.
 - **Home Screen installation is the primary quick-access mechanism**: add
-  BYZCARD to the Home Screen and the icon opens straight to your card and
+  Byzcard to the Home Screen and the icon opens straight to your card and
   its QR — free, offline-capable, no Apple Developer account involved.
 - **Printing is first-class and fully local**: two V1 formats — Standard
   ID Card (CR80, 3.375 × 2.125 in) and Event Badge (4 × 6 in) — via the
   browser print dialog, which also provides Save as PDF. Print at
   100% / Actual size. (Possible future work: batch badge generation from a
   local CSV — not implemented.)
-- BYZCARD has **no accounts, no database, and no server-side card storage**.
+- Byzcard has **no accounts, no database, and no server-side card storage**.
 - The only server functionality is a pair of **stateless Wallet signing
   endpoints** (Apple / Google), which process a request in memory and retain
   nothing. Both are optional — without credentials the whole core still works.
 - **Apple note**: only a deployment operator/self-hoster who wants the
-  optional Apple Wallet feature needs Apple credentials. Normal BYZCARD
-  users never need an Apple Developer account; core BYZCARD does not
+  optional Apple Wallet feature needs Apple credentials. Normal Byzcard
+  users never need an Apple Developer account; core Byzcard does not
   depend on Apple Wallet.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full technical
@@ -76,7 +78,7 @@ everything else works.
 
 ## Privacy
 
-> Your card is created and stored locally on your device. BYZCARD has no
+> Your card is created and stored locally on your device. Byzcard has no
 > accounts and no card database, and does not store your card, photo, or
 > contact information. Information is transmitted only when you explicitly
 > use a sharing or Wallet feature. Wallet signing processes the required
@@ -88,7 +90,7 @@ recording every network request during a recipient visit.
 
 ## Design
 
-BYZCARD currently uses the platform-native system font stack; no web font
+Byzcard currently uses the platform-native system font stack; no web font
 is bundled. The stack is `-apple-system, BlinkMacSystemFont, "SF Pro Text",
 "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif` — Apple devices
 render San Francisco, Windows renders Segoe UI, and Android commonly falls
@@ -96,8 +98,8 @@ back to Roboto.
 
 ## Dependencies
 
-Runtime: `next`, `react`, `react-dom`. **Nothing else.** QR encoding,
-vCard, NDEF, compression, IndexedDB access, ZIP, PNG, and even the CMS
-(PKCS#7) signature for Apple Wallet are implemented in-repo on top of
-platform APIs and `node:crypto`. Dev-only dependencies (test tooling,
+Runtime: `next`, `react`, `react-dom`, and `motion` (the landing-page
+animation library). **Nothing else.** QR encoding, vCard, NDEF, compression,
+IndexedDB access, ZIP, PNG, and even the CMS (PKCS#7) signature for Apple
+Wallet are implemented in-repo on top of platform APIs and `node:crypto`. Dev-only dependencies (test tooling,
 `jsqr` as an independent QR decode verifier, Playwright) never ship.

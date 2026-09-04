@@ -24,7 +24,12 @@ test("owner card: 96px photo, and blank website renders a presentation-only em d
   await createCard(page, true, false); // photo yes, website no
   const photo = page.getByAltText(`Photo of ${TEST_CARD.fullName}`).first();
   await expect(photo).toBeVisible();
-  expect(await photo.getAttribute("width")).toBe("96");
+  // 96px-wide 4:5 portrait frame (the img itself carries the crop layout).
+  const frame = await photo.evaluate((el) => {
+    const parent = el.parentElement;
+    return { width: parent?.style.width, height: parent?.style.height };
+  });
+  expect(frame).toEqual({ width: "96px", height: "120px" });
 
   // WEBSITE row present with em dash on the owner card (scoped to the
   // visible card — the hidden print sheet repeats these strings).
@@ -50,18 +55,36 @@ test("owner card: 96px photo, and blank website renders a presentation-only em d
   await recipient.close();
 });
 
-test("web app manifest is served with the BYZCARD install contract", async ({ page }) => {
+test("app screens show the Byzcard header and it navigates home", async ({ page }) => {
+  await createCard(page);
+  const brand = page.getByRole("banner").getByRole("link", { name: "Byzcard" });
+  await expect(brand).toBeVisible();
+  await brand.click();
+  await page.waitForURL(/\/$/u);
+  await expect(
+    page.getByRole("heading", { level: 1, name: /Your next introduction/u }),
+  ).toBeVisible();
+  await page.goto("/create");
+  await expect(page.getByRole("banner").getByRole("link", { name: "Byzcard" })).toBeVisible();
+});
+
+test("web app manifest is served with the Byzcard install contract", async ({ page }) => {
   const response = await page.request.get("/manifest.webmanifest");
   expect(response.ok()).toBe(true);
   const manifest = (await response.json()) as {
     name: string;
+    short_name: string;
     start_url: string;
+    scope: string;
     display: string;
     icons: { src: string }[];
   };
-  expect(manifest.name).toBe("BYZCARD");
+  expect(manifest.name).toBe("Byzcard");
+  expect(manifest.short_name).toBe("Byzcard");
   expect(manifest.start_url).toBe("/card");
+  expect(manifest.scope).toBe("/");
   expect(manifest.display).toBe("standalone");
+  expect(manifest.icons.length).toBeGreaterThanOrEqual(3);
   for (const icon of manifest.icons) {
     const iconResponse = await page.request.get(icon.src);
     expect(iconResponse.ok(), icon.src).toBe(true);
@@ -80,11 +103,17 @@ test("Quick Access sits above Wallet and captures the native install prompt (Chr
   // the card loads from IndexedDB.)
   await expect(page.getByRole("heading", { name: "Quick access" })).toBeVisible();
   const sections = await page.locator("h2").allTextContents();
-  const order = ["Quick access", "Share", "Print", "Wallet"].map((name) =>
-    sections.findIndex((s) => s.toLowerCase() === name.toLowerCase()),
-  );
-  expect(order.every((index) => index >= 0)).toBe(true);
-  expect([...order]).toEqual([...order].sort((a, b) => a - b));
+  const quickIndex = sections.findIndex((s) => /quick access/iu.test(s));
+  const shareIndex = sections.findIndex((s) => /^share$/iu.test(s.trim()));
+  expect(quickIndex).toBeGreaterThanOrEqual(0);
+  expect(shareIndex).toBeGreaterThan(quickIndex);
+  // Secondary tools are collapsed disclosure rows below Share, in order.
+  await expect(page.locator("summary.disclosure-summary")).toHaveText([
+    "Do you want to print this?",
+    "Add to Wallet",
+    "Use an NFC tag?",
+    "Backup & restore",
+  ]);
 
   // Synthesize the Chromium install prompt event with a stubbed prompt().
   await page.evaluate(() => {
@@ -99,7 +128,7 @@ test("Quick Access sits above Wallet and captures the native install prompt (Chr
     });
     window.dispatchEvent(event);
   });
-  await page.getByRole("button", { name: "Add BYZCARD to Home Screen" }).click();
+  await page.getByRole("button", { name: "Add Byzcard to Home Screen" }).click();
   await expect(page.getByText(/opens from your Home Screen/u)).toBeVisible();
   const prompted = await page.evaluate(() => {
     const w: Window & { __installMarker?: { prompted: boolean } } = window;
@@ -108,17 +137,29 @@ test("Quick Access sits above Wallet and captures the native install prompt (Chr
   expect(prompted).toBe(true);
 });
 
-test("iOS Safari path shows manual Add-to-Home-Screen instructions (WebKit)", async ({
+test("iOS path: backup-first download, then concise install instructions (WebKit)", async ({
   page,
   browserName,
 }) => {
   test.skip(browserName !== "webkit", "iPhone Safari instruction path");
   await createCard(page);
-  await page.getByRole("button", { name: "Add BYZCARD to Home Screen" }).click();
-  const sheet = page.getByRole("dialog", { name: /Add BYZCARD to your Home Screen/u });
+  await page.getByRole("button", { name: "Add Byzcard to Home Screen" }).click();
+
+  // Step 1: a predictable backup download with the exact filename shown.
+  const backup = page.getByRole("dialog", { name: "Save a backup first" });
+  await expect(backup).toBeVisible();
+  const downloadPromise = page.waitForEvent("download");
+  await backup.getByRole("button", { name: "Download backup" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("ada-lovelace.byzcard");
+  await expect(backup.getByText(/Backup ready — file: ada-lovelace\.byzcard/u)).toBeVisible();
+  await backup.getByRole("button", { name: "Continue to Home Screen instructions" }).click();
+
+  // Step 2: clean instructions — no technical storage paragraph.
+  const sheet = page.getByRole("dialog", { name: /Add Byzcard to your Home Screen/u });
   await expect(sheet).toBeVisible();
-  await expect(sheet.getByText(/Share button in Safari/u)).toBeVisible();
-  await expect(sheet.getByText(/Add to Home Screen/u)).toBeVisible();
+  await expect(sheet.getByText(/Share button in your browser/u)).toBeVisible();
+  await expect(sheet.getByText(/its own storage/u)).toHaveCount(0);
   await sheet.getByRole("button", { name: "Got it" }).click();
   await expect(sheet).toHaveCount(0);
 });
@@ -140,14 +181,20 @@ test("standalone display-mode shows the installed state instead of the CTA", asy
     };
   });
   await createCard(page);
+  // The standalone launch reads the same local storage: the saved card
+  // renders — this is the Home-Screen persistence contract where the
+  // platform shares storage (Android/Chromium).
+  await expect(page.getByRole("article", { name: "Business card preview" })).toBeVisible();
   await expect(page.getByText(/opens from your Home Screen/u)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Add BYZCARD to Home Screen" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Add Byzcard to Home Screen" })).toHaveCount(0);
 });
 
 test("print: two formats, exact physical layouts, screen UI hidden in print media", async ({
   page,
 }) => {
   await createCard(page);
+  // Print now lives in a collapsed disclosure; open it first.
+  await page.getByText("Do you want to print this?").click();
   await expect(page.getByRole("radio", { name: /Standard ID Card/u })).toBeChecked();
   expect(await page.getByRole("radio").count()).toBe(2);
 
@@ -173,7 +220,7 @@ test("print: two formats, exact physical layouts, screen UI hidden in print medi
   expect(Math.round(cr80Box?.width ?? 0)).toBe(324); // 3.375in
   expect(Math.round(cr80Box?.height ?? 0)).toBe(204); // 2.125in
   await expect(page.getByRole("button", { name: "Print / Save as PDF" })).toBeHidden();
-  await expect(page.getByRole("button", { name: "Add BYZCARD to Home Screen" })).toBeHidden();
+  await expect(page.getByRole("button", { name: "Add Byzcard to Home Screen" })).toBeHidden();
   // QR square with intact quiet-zone tile.
   const qrTile = cr80.locator("[role='img']");
   const qrBox = await qrTile.boundingBox();

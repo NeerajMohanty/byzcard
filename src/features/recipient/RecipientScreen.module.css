@@ -1,9 +1,30 @@
 .card {
+  /* Dark card inside the light shell — tokens re-pinned like CardView. */
+  --text: #ffffff;
+  --text-dim: #ffffff;
+  --label: #ffffff;
+  --card-edge: #1d2942;
   background: linear-gradient(160deg, #0e1730 0%, #0b1220 55%, #0a101c 100%);
   border: 1px solid var(--card-edge);
   border-radius: var(--radius-card);
   padding: 22px 20px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  color: var(--text);
+}
+
+.pronouns {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-left: 7px;
+  white-space: nowrap;
+}
+
+.headline {
+  margin: 4px 0 0;
+  font-size: 13px;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
 }
 
 .top {

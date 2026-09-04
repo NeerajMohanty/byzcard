@@ -103,9 +103,8 @@ describe("PrintSheets", () => {
       );
       const qr = container.querySelector("[role='img']");
       expect(qr, format).not.toBeNull();
-      expect(container.querySelector("svg")?.getAttribute("viewBox")).toBe(
-        `0 0 ${QR.size} ${QR.size}`,
-      );
+      // Scope to the QR tile: the brand lockup contributes its own svg.
+      expect(qr?.querySelector("svg")?.getAttribute("viewBox")).toBe(`0 0 ${QR.size} ${QR.size}`);
       unmount();
     }
   });

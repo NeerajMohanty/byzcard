@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Card } from "@/core/card/types";
 import { loadWalletIds, resetAllLocalData, type StoredPhoto } from "@/adapters/idb/cardStore";
-import { shareOrDownloadFile } from "@/adapters/share/webShare";
+import { downloadBlob } from "@/adapters/share/webShare";
 import { makeBackupFile } from "./files";
 import { ImportBackupButton } from "./ImportBackupButton";
 
@@ -23,9 +23,10 @@ export function BackupActions({ card, photo, onRestored }: BackupActionsProps) {
     setMessage(null);
     const walletIds = await loadWalletIds();
     const file = await makeBackupFile(card, photo, walletIds);
-    const outcome = await shareOrDownloadFile(file, "BYZCARD backup");
-    if (outcome === "downloaded") setMessage(`Backup saved as ${file.name}.`);
-    if (outcome === "shared") setMessage("Backup shared.");
+    // A predictable local download — never the share sheet, which on iOS
+    // can deliver the share title as a stray text file instead.
+    downloadBlob(file, file.name);
+    setMessage(`Backup created: ${file.name} — check your browser's Downloads.`);
   };
 
   const handleReset = async () => {

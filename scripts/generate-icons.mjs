@@ -1,7 +1,7 @@
 /**
- * Generates the BYZCARD app icons (PWA + apple-touch) as repository-local
- * PNGs from the same design as src/app/icon.svg — navy rounded square,
- * card outline, portrait circle, two text bars.
+ * Generates the Byzcard app icons (PWA + apple-touch) as repository-local
+ * PNGs from the canonical B mark (public/brand/byzcard-b-logo.svg):
+ * white rounded tile, black geometric B.
  *
  * Run:  node scripts/generate-icons.mjs
  *
@@ -12,9 +12,8 @@
 import { deflateSync } from "node:zlib";
 import { mkdirSync, writeFileSync } from "node:fs";
 
-const NAVY = [11, 18, 32];
-const LIGHT = [232, 234, 240];
-const MUTED = [148, 163, 184];
+const WHITE = [255, 255, 255];
+const BLACK = [0, 0, 0];
 
 // ── PNG encoding (RGBA, 8-bit) ───────────────────────────────────────
 
@@ -85,14 +84,6 @@ function fillRoundedRect(canvas, x, y, w, h, radius, color) {
   }
 }
 
-function fillCircle(canvas, cx, cy, radius, color) {
-  for (let py = Math.floor(cy - radius); py <= cy + radius; py++) {
-    for (let px = Math.floor(cx - radius); px <= cx + radius; px++) {
-      if ((px - cx) ** 2 + (py - cy) ** 2 <= radius * radius) put(canvas, px, py, color);
-    }
-  }
-}
-
 function downsample(canvas, factor) {
   const outSize = canvas.size / factor;
   const out = new Uint8Array(outSize * outSize * 4);
@@ -113,24 +104,34 @@ function downsample(canvas, factor) {
 }
 
 /**
- * Draw the BYZCARD mark. `inset` shrinks the design inside the square
- * (maskable icons need a safe zone); background always fills the square.
+ * The canonical B mark decomposed into rectangles on its 280-unit grid.
+ * These are the exact regions filled by the path + counter dot in
+ * public/brand/byzcard-b-logo.svg — the single source of truth.
+ */
+const B_RECTS = [
+  [55, 26, 30, 179], // vertical stem
+  [112, 100, 93, 30], // top arm
+  [175, 130, 30, 75], // right side
+  [55, 205, 150, 30], // bottom bar
+  [112, 153, 31, 30], // counter dot
+];
+
+/**
+ * Draw the Byzcard B icon: white tile, black mark. `inset` shrinks the
+ * mark inside the square (maskable icons need a safe zone); the white
+ * background always fills the square.
  */
 function drawIcon(size, inset, roundedBackground) {
   const factor = 4;
   const s = size * factor;
   const canvas = makeCanvas(s);
-  fillRoundedRect(canvas, 0, 0, s, s, roundedBackground ? s * 0.22 : 0, NAVY);
+  fillRoundedRect(canvas, 0, 0, s, s, roundedBackground ? (s * 50) / 280 : 0, WHITE);
 
-  const u = (s * (1 - inset * 2)) / 64; // design unit on the 64-unit grid
+  const u = (s * (1 - inset * 2)) / 280; // design unit on the 280-unit grid
   const o = s * inset; // origin offset
-  // Card outline: filled light rounded rect with navy inner fill.
-  fillRoundedRect(canvas, o + 10 * u, o + 18 * u, 44 * u, 28 * u, 6 * u, LIGHT);
-  fillRoundedRect(canvas, o + 13 * u, o + 21 * u, 38 * u, 22 * u, 4 * u, NAVY);
-  // Portrait circle right, two text bars left.
-  fillCircle(canvas, o + 42 * u, o + 32 * u, 5.5 * u, LIGHT);
-  fillRoundedRect(canvas, o + 16 * u, o + 26 * u, 14 * u, 3 * u, 1.5 * u, MUTED);
-  fillRoundedRect(canvas, o + 16 * u, o + 33 * u, 18 * u, 3 * u, 1.5 * u, LIGHT);
+  for (const [x, y, w, h] of B_RECTS) {
+    fillRoundedRect(canvas, o + x * u, o + y * u, w * u, h * u, 0, BLACK);
+  }
 
   const final = downsample(canvas, factor);
   return encodePng(final.size, final.rgba);

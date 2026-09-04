@@ -1,15 +1,18 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { PhotoMeta } from "@/core/card/types";
+import { DEFAULT_PHOTO_CROP, type PhotoCrop, type PhotoMeta } from "@/core/card/types";
 import { PHOTO_ACCEPTED_TYPES, processPhoto, type PhotoError } from "@/adapters/photo/process";
 import { useObjectUrl } from "@/lib/useObjectUrl";
 import { Avatar } from "@/components/Avatar";
+import { PhotoAdjust } from "./PhotoAdjust";
 
 interface PhotoFieldProps {
   fullName: string;
-  photoBlob: Blob | null;
+  photo: { blob: Blob; meta: PhotoMeta } | null;
+  crop: PhotoCrop;
   onPhotoChange: (photo: { blob: Blob; meta: PhotoMeta } | null) => void;
+  onCropChange: (crop: PhotoCrop) => void;
 }
 
 const ERROR_MESSAGES: Record<PhotoError, string> = {
@@ -19,12 +22,24 @@ const ERROR_MESSAGES: Record<PhotoError, string> = {
   "process-failed": "The photo could not be processed on this device.",
 };
 
-/** Photo picker with fully local resize/compress; nothing is uploaded. */
-export function PhotoField({ fullName, photoBlob, onPhotoChange }: PhotoFieldProps) {
+/**
+ * Compact photo picker: preview, Replace/Remove, and an "Adjust photo"
+ * entry into the focused drag/pinch framing editor. Processing is fully
+ * local (resize + compress once, at selection time).
+ */
+export function PhotoField({
+  fullName,
+  photo,
+  crop,
+  onPhotoChange,
+  onCropChange,
+}: PhotoFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [adjusting, setAdjusting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const previewUrl = useObjectUrl(photoBlob);
+  const previewUrl = useObjectUrl(photo?.blob ?? null);
+  const aspect = photo !== null && photo.meta.height > 0 ? photo.meta.width / photo.meta.height : 1;
 
   const handleFile = async (file: File | undefined) => {
     if (file === undefined) return;
@@ -34,6 +49,7 @@ export function PhotoField({ fullName, photoBlob, onPhotoChange }: PhotoFieldPro
     setBusy(false);
     if (result.ok) {
       onPhotoChange({ blob: result.blob, meta: result.meta });
+      onCropChange(DEFAULT_PHOTO_CROP);
     } else {
       setError(ERROR_MESSAGES[result.error]);
     }
@@ -43,8 +59,8 @@ export function PhotoField({ fullName, photoBlob, onPhotoChange }: PhotoFieldPro
   return (
     <div className="field">
       <label htmlFor="photo-input">Professional photo (optional)</label>
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        <Avatar fullName={fullName} photoUrl={previewUrl} size={64} />
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+        <Avatar fullName={fullName} photoUrl={previewUrl} size={80} crop={crop} aspect={aspect} />
         <div className="stack" style={{ flex: 1 }}>
           <button
             type="button"
@@ -52,15 +68,25 @@ export function PhotoField({ fullName, photoBlob, onPhotoChange }: PhotoFieldPro
             disabled={busy}
             onClick={() => inputRef.current?.click()}
           >
-            {busy ? "Processing…" : photoBlob === null ? "Add photo" : "Replace photo"}
+            {busy ? "Processing…" : photo === null ? "Add photo" : "Replace photo"}
           </button>
-          {photoBlob !== null && (
+          {photo !== null && (
             <button type="button" className="btn btn-danger" onClick={() => onPhotoChange(null)}>
               Remove photo
             </button>
           )}
         </div>
       </div>
+      {photo !== null && (
+        <button
+          type="button"
+          className="btn"
+          style={{ marginTop: 10 }}
+          onClick={() => setAdjusting(true)}
+        >
+          Adjust photo
+        </button>
+      )}
       <input
         ref={inputRef}
         id="photo-input"
@@ -75,6 +101,16 @@ export function PhotoField({ fullName, photoBlob, onPhotoChange }: PhotoFieldPro
         </p>
       )}
       <p className="note">Resized and stored only on this device.</p>
+      {adjusting && photo !== null && previewUrl !== null && (
+        <PhotoAdjust
+          fullName={fullName}
+          photoUrl={previewUrl}
+          aspect={aspect}
+          crop={crop}
+          onCropChange={onCropChange}
+          onClose={() => setAdjusting(false)}
+        />
+      )}
     </div>
   );
 }

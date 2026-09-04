@@ -2,7 +2,7 @@
   "name": "byzcard",
   "version": "1.0.0",
   "private": true,
-  "description": "BYZCARD — mobile-first digital business card. Local-first, zero card storage.",
+  "description": "Byzcard — mobile-first digital business card. Local-first, zero card storage.",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
@@ -18,6 +18,7 @@
     "wallet:google:setup": "node --experimental-strip-types scripts/google-wallet-setup.ts"
   },
   "dependencies": {
+    "motion": "^13.2.0",
     "next": "^16.3.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

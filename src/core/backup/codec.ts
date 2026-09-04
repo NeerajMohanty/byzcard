@@ -3,7 +3,13 @@
  * Parsing is defensive: every field is checked before use, malformed files
  * are rejected with a typed error, and nothing from the file is executed.
  */
-import type { Card, WalletIds } from "../card/types";
+import {
+  clampPhotoCrop,
+  isPhotoCrop,
+  type Card,
+  type PhotoCrop,
+  type WalletIds,
+} from "../card/types";
 import { isStoredCard } from "../card/validate";
 import { slugifyName } from "../vcard/build";
 import {
@@ -20,6 +26,7 @@ import {
 export interface BackupInput {
   card: Card;
   photo?: BackupPhotoV1;
+  photoCrop?: PhotoCrop;
   walletIds?: WalletIds;
 }
 
@@ -31,6 +38,9 @@ export function serializeBackup(input: BackupInput, exportedAt: string): string 
     exportedAt,
     card: input.card,
     ...(input.photo !== undefined ? { photo: input.photo } : {}),
+    ...(input.photo !== undefined && input.photoCrop !== undefined
+      ? { photoCrop: clampPhotoCrop(input.photoCrop) }
+      : {}),
     ...(input.walletIds !== undefined ? { walletIds: input.walletIds } : {}),
   };
   return JSON.stringify(backup, null, 2);
@@ -126,6 +136,12 @@ export function parseBackup(text: string): BackupParseResult {
     photo = parsedPhoto;
   }
 
+  // Tolerant by design: a malformed crop never rejects a whole backup.
+  const photoCrop =
+    photo !== undefined && isPhotoCrop(record.photoCrop)
+      ? clampPhotoCrop(record.photoCrop)
+      : undefined;
+
   const exportedAt = typeof record.exportedAt === "string" ? record.exportedAt : "";
   const walletIds = parseWalletIds(record.walletIds);
   return {
@@ -136,6 +152,7 @@ export function parseBackup(text: string): BackupParseResult {
       exportedAt,
       card,
       ...(photo !== undefined ? { photo } : {}),
+      ...(photoCrop !== undefined ? { photoCrop } : {}),
       ...(walletIds !== undefined ? { walletIds } : {}),
     },
   };

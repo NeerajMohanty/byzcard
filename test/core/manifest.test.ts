@@ -6,9 +6,9 @@ import { join } from "node:path";
 describe("web app manifest (Home Screen install)", () => {
   const data = manifest();
 
-  it("declares the BYZCARD identity", () => {
-    expect(data.name).toBe("BYZCARD");
-    expect(data.short_name).toBe("BYZCARD");
+  it("declares the Byzcard identity", () => {
+    expect(data.name).toBe("Byzcard");
+    expect(data.short_name).toBe("Byzcard");
   });
 
   it("opens installed launches directly on the local card", () => {
@@ -17,9 +17,9 @@ describe("web app manifest (Home Screen install)", () => {
     expect(data.display).toBe("standalone");
   });
 
-  it("uses the dark theme colors", () => {
-    expect(data.theme_color).toBe("#05070d");
-    expect(data.background_color).toBe("#05070d");
+  it("uses the warm-light shell colors", () => {
+    expect(data.theme_color).toBe("#f7f3ec");
+    expect(data.background_color).toBe("#f7f3ec");
   });
 
   it("references repository-local icons including 192, 512, and maskable", () => {

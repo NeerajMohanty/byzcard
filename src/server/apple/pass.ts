@@ -11,7 +11,7 @@ import type { AppleWalletConfig } from "../env";
 import { solidPng } from "../png";
 import { buildZip, type ZipEntry } from "../zip";
 
-/** Card surface colors — matches the BYZCARD visual design. */
+/** Card surface colors — matches the Byzcard visual design. */
 const BACKGROUND = "rgb(11,18,32)";
 const FOREGROUND = "rgb(255,255,255)";
 const LABEL = "rgb(148,163,184)";
@@ -47,9 +47,9 @@ function buildPassJson(input: ApplePassInput): string {
     passTypeIdentifier: input.config.passTypeId,
     teamIdentifier: input.config.teamId,
     serialNumber: input.serialNumber,
-    organizationName: "BYZCARD",
+    organizationName: "Byzcard",
     description: `Business card — ${fields.fullName}`,
-    logoText: "BYZCARD",
+    logoText: "Byzcard",
     foregroundColor: FOREGROUND,
     backgroundColor: BACKGROUND,
     labelColor: LABEL,

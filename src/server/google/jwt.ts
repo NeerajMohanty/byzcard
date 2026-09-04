@@ -1,7 +1,7 @@
 /**
  * Google Wallet Generic Pass "save" JWT, server-only.
  *
- * Production lifecycle (per Google's documented pattern): the BYZCARD
+ * Production lifecycle (per Google's documented pattern): the Byzcard
  * GenericClass is created ONCE by the operator (`npm run wallet:google:setup`);
  * every user save JWT then contains only a GenericObject referencing that
  * pre-created class. Normal issuance makes zero Google API calls and stores
@@ -72,7 +72,7 @@ function buildGenericObject(input: GooglePassInput): Record<string, unknown> {
     classId: googleClassId(config.issuerId),
     state: "ACTIVE",
     hexBackgroundColor: HEX_BACKGROUND,
-    cardTitle: localized("BYZCARD"),
+    cardTitle: localized("Byzcard"),
     header: localized(fields.fullName),
     subheader: localized(fields.role),
     barcode: {

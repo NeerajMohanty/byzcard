@@ -55,14 +55,18 @@ async function captureInstallUi(
   shot: (name: string) => string,
   browserName: string,
 ): Promise<void> {
-  const cta = page.getByRole("button", { name: "Add BYZCARD to Home Screen" });
+  const cta = page.getByRole("button", { name: "Add Byzcard to Home Screen" });
   await expect(cta).toBeVisible();
   if (browserName === "webkit") {
-    // iPhone Safari: manual instruction sheet.
+    // iPhone Safari: backup-first step, then the instruction sheet.
     await cta.click();
-    const sheet = page.getByRole("dialog", { name: /Add BYZCARD to your Home Screen/u });
+    const backup = page.getByRole("dialog", { name: "Save a backup first" });
+    await expect(backup).toBeVisible();
+    await page.screenshot({ path: shot("09-ios-backup-first") });
+    await backup.getByRole("button", { name: "Continue without backup" }).click();
+    const sheet = page.getByRole("dialog", { name: /Add Byzcard to your Home Screen/u });
     await expect(sheet).toBeVisible();
-    await page.screenshot({ path: shot("09-ios-install-sheet") });
+    await page.screenshot({ path: shot("09b-ios-install-sheet") });
     await sheet.getByRole("button", { name: "Got it" }).click();
   } else {
     // Chromium: the install CTA block.
@@ -72,6 +76,8 @@ async function captureInstallUi(
 }
 
 async function capturePrintPreviews(page: Page, shot: (name: string) => string): Promise<void> {
+  // Print controls live in a collapsed disclosure on the card screen.
+  await page.getByText("Do you want to print this?").click();
   await page.emulateMedia({ media: "print" });
   await expect(page.locator("[data-print-format='cr80']")).toBeVisible();
   await page.locator("[data-print-format='cr80']").screenshot({ path: shot("10-print-cr80") });
@@ -85,14 +91,16 @@ async function capturePrintPreviews(page: Page, shot: (name: string) => string):
 
 async function captureVariants(page: Page, shot: (name: string) => string): Promise<void> {
   page.on("dialog", (dialog) => void dialog.accept());
-  // Initials (no photo) variant.
+  // Initials (no photo) variant. Delete lives inside the Backup disclosure.
   await page.goto("/card");
+  await page.getByText("Backup & restore").click();
   await page.getByRole("button", { name: /Delete card/u }).click();
   await page.waitForURL(/\/$/u);
   await createCard(page, false);
   await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
   await cardArticle(page).screenshot({ path: shot("08-card-initials") });
   // Blank-website variant (photo, no website → WEBSITE + em dash).
+  await page.getByText("Backup & restore").click();
   await page.getByRole("button", { name: /Delete card/u }).click();
   await page.waitForURL(/\/$/u);
   await createCard(page, true, false);
@@ -101,6 +109,7 @@ async function captureVariants(page: Page, shot: (name: string) => string): Prom
 }
 
 test("capture UI review screenshots", async ({ page, browserName }, testInfo) => {
+  test.slow(); // full-app screenshot tour; WebKit runs close to the base limit
   mkdirSync(DIR, { recursive: true });
   const shot = (name: string): string => `${DIR}/${testInfo.project.name}-${name}.png`;
   await captureLanding(page, shot);

@@ -1,5 +1,12 @@
 import type { QrSymbol } from "@/core/qr";
-import { displayUrl } from "@/core/card/types";
+import {
+  displayName,
+  displayUrl,
+  linkEntryLabel,
+  type LinkEntry,
+  type LinkGroup,
+  type PhotoCrop,
+} from "@/core/card/types";
 import { Avatar } from "./Avatar";
 import { QrSvg } from "./QrSvg";
 import styles from "./CardView.module.css";
@@ -12,12 +19,29 @@ export interface CardViewFields {
   phone: string;
   email: string;
   website?: string;
+  preferredName?: string;
+  pronouns?: string;
+  headline?: string;
+  social?: LinkEntry[];
+  messaging?: LinkEntry[];
+  links?: LinkEntry[];
+}
+
+/** One compact uppercase chip line naming the populated optional services. */
+function linkChipLabels(fields: CardViewFields): string[] {
+  const groups: LinkGroup[] = ["social", "messaging", "links"];
+  return groups.flatMap((group) =>
+    (fields[group] ?? []).map((entry) => linkEntryLabel(group, entry)),
+  );
 }
 
 interface CardViewProps {
   fields: CardViewFields;
   photoUrl: string | null;
   qr: QrSymbol | null;
+  photoCrop?: PhotoCrop;
+  /** Natural photo aspect (width / height); square assumed when unknown. */
+  photoAspect?: number;
 }
 
 function Value({ value, placeholder }: { value: string; placeholder: string }) {
@@ -31,7 +55,7 @@ function Value({ value, placeholder }: { value: string; placeholder: string }) {
  * look: used by the live editor preview, the local card screen, and the
  * landing example — never duplicated.
  */
-export function CardView({ fields, photoUrl, qr }: CardViewProps) {
+export function CardView({ fields, photoUrl, qr, photoCrop, photoAspect }: CardViewProps) {
   const website = fields.website !== undefined && fields.website !== "" ? fields.website : null;
   return (
     <article className={styles.card} aria-label="Business card preview">
@@ -52,14 +76,26 @@ export function CardView({ fields, photoUrl, qr }: CardViewProps) {
         <div className={styles.identityText}>
           <p className={styles.label}>{fields.role === "" ? "Role" : fields.role}</p>
           <h2 className={styles.name}>
-            {fields.fullName === "" ? (
+            {fields.fullName === "" && (fields.preferredName ?? "") === "" ? (
               <span className={styles.placeholder}>Your Name</span>
             ) : (
-              fields.fullName
+              displayName(fields)
+            )}
+            {fields.pronouns !== undefined && fields.pronouns !== "" && (
+              <span className={styles.pronouns}>({fields.pronouns})</span>
             )}
           </h2>
+          {fields.headline !== undefined && fields.headline !== "" && (
+            <p className={styles.headline}>{fields.headline}</p>
+          )}
         </div>
-        <Avatar fullName={fields.fullName} photoUrl={photoUrl} size={96} />
+        <Avatar
+          fullName={fields.fullName}
+          photoUrl={photoUrl}
+          size={96}
+          crop={photoCrop}
+          aspect={photoAspect}
+        />
       </div>
 
       <div className={styles.contact}>
@@ -85,6 +121,9 @@ export function CardView({ fields, photoUrl, qr }: CardViewProps) {
         </div>
       </div>
 
+      {linkChipLabels(fields).length > 0 && (
+        <p className={styles.linkChips}>{linkChipLabels(fields).join(" · ")}</p>
+      )}
       {qr !== null && (
         <div className={styles.qrWrap}>
           <div className={styles.qrBox}>

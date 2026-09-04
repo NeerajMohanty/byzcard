@@ -72,14 +72,25 @@ export async function kvClear(): Promise<void> {
   await withStore("readwrite", (store) => store.clear());
 }
 
-/** Best-effort request for eviction-protected storage. */
+/**
+ * Best-effort request for eviction-protected storage — strictly
+ * prompt-free. Firefox surfaces navigator.storage.persist() as a
+ * permission dialog, which must never interrupt Save (it reads as a
+ * surprise popup); persistence is requested only where it is already
+ * granted, or where no permission model exists to prompt with.
+ */
 export async function requestPersistentStorage(): Promise<boolean> {
   try {
-    if (typeof navigator !== "undefined" && navigator.storage?.persist !== undefined) {
-      return await navigator.storage.persist();
+    if (typeof navigator === "undefined" || navigator.storage?.persist === undefined) return false;
+    if (typeof navigator.permissions?.query === "function") {
+      const status = await navigator.permissions.query({
+        name: "persistent-storage" as PermissionName,
+      });
+      if (status.state !== "granted") return false;
     }
+    return await navigator.storage.persist();
   } catch {
     // Persistence is an optimization, never a requirement.
+    return false;
   }
-  return false;
 }

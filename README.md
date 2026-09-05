@@ -1,8 +1,15 @@
 # Byzcard
 
-**Your next introduction doesn’t need another app.**
+**Stop renting your business card! Your next introduction doesn’t need another app.**
 
 A mobile-first digital business card that lives on your phone.
+Your name, phone number and QR code should not need an account, a cloud database, or another monthly subscription.
+
+**Byzcard is the open source, local first digital business card.**
+
+No account. No database. No subscription. No lock in.
+
+Your card lives on your device.
 
 **[Try Byzcard](https://byzcard.cc)** · **[View source](https://github.com/NeerajMohanty/byzcard)**
 

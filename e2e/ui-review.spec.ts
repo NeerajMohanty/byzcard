@@ -9,6 +9,9 @@ import { createCard, fillCardForm, TEST_CARD } from "./helpers";
 
 const DIR = "artifacts/ui-review";
 
+/** Full-page captures at CSS scale — see landing-review.spec.ts. */
+const FULL_PAGE = { fullPage: true, scale: "css" } as const;
+
 test.skip(({ isMobile }) => !isMobile, "UI review screenshots are captured at phone size only");
 
 const cardArticle = (page: Page) => page.getByRole("article", { name: "Business card preview" });
@@ -17,27 +20,27 @@ async function captureLanding(page: Page, shot: (name: string) => string): Promi
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Create my card" }).first()).toBeVisible();
   await expect(page.getByRole("img", { name: /QR code/u }).first()).toBeVisible();
-  await page.screenshot({ path: shot("01-landing"), fullPage: true });
+  await page.screenshot({ path: shot("01-landing"), ...FULL_PAGE });
 }
 
 async function captureValidationErrors(page: Page, shot: (name: string) => string): Promise<void> {
   await page.goto("/create");
   await page.getByRole("button", { name: "Save card" }).click();
   await expect(page.getByText("Name is required")).toBeVisible();
-  await page.screenshot({ path: shot("02-validation-errors"), fullPage: true });
+  await page.screenshot({ path: shot("02-validation-errors"), ...FULL_PAGE });
 }
 
 async function captureEditorAndCard(page: Page, shot: (name: string) => string): Promise<void> {
   await page.goto("/create");
   await fillCardForm(page, true);
   await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
-  await page.screenshot({ path: shot("03-create-filled"), fullPage: true });
+  await page.screenshot({ path: shot("03-create-filled"), ...FULL_PAGE });
   await cardArticle(page).screenshot({ path: shot("04-live-preview-card") });
 
   await page.getByRole("button", { name: "Save card" }).click();
   await page.waitForURL("**/card");
   await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
-  await page.screenshot({ path: shot("05-card-screen"), fullPage: true });
+  await page.screenshot({ path: shot("05-card-screen"), ...FULL_PAGE });
   await cardArticle(page).screenshot({ path: shot("06-card-hero") });
 }
 
@@ -46,7 +49,7 @@ async function captureRecipient(page: Page, shot: (name: string) => string): Pro
   expect(shareUrl).not.toBeNull();
   await page.goto(shareUrl ?? "");
   await expect(page.getByRole("heading", { name: TEST_CARD.fullName })).toBeVisible();
-  await page.screenshot({ path: shot("07-recipient"), fullPage: true });
+  await page.screenshot({ path: shot("07-recipient"), ...FULL_PAGE });
   await page.goto("/card");
 }
 
@@ -99,12 +102,12 @@ async function captureVariants(page: Page, shot: (name: string) => string): Prom
   await createCard(page, false);
   await expect(page.getByRole("img", { name: /QR code/u })).toBeVisible();
   await cardArticle(page).screenshot({ path: shot("08-card-initials") });
-  // Blank-website variant (photo, no website → WEBSITE + em dash).
+  // Blank-website variant (photo, no website → the row is simply absent).
   await page.getByText("Backup & restore").click();
   await page.getByRole("button", { name: /Delete card/u }).click();
   await page.waitForURL(/\/$/u);
   await createCard(page, true, false);
-  await expect(cardArticle(page).getByText("—")).toBeVisible();
+  await expect(cardArticle(page).getByText("Website")).toHaveCount(0);
   await cardArticle(page).screenshot({ path: shot("12-card-hero-no-website") });
 }
 

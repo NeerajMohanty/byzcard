@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import type { Transition } from "motion/react";
-import { ExampleCard } from "@/components/ExampleCard";
 import { QrSvg } from "@/components/QrSvg";
+import { ByzcardExpanded, ByzcardPreviewFace } from "./ExpandableByzcard";
 import type { QrSymbol } from "@/core/qr";
 import { EXAMPLE_CARD } from "./exampleData";
 import { displayName, initialsOf, linkEntryLabel, type LinkGroup } from "@/core/card/types";
@@ -108,15 +108,13 @@ interface ReelItem {
 
 type ReelItems = readonly [ReelItem, ReelItem, ReelItem, ReelItem];
 
-function buildItems(qr: QrSymbol): ReelItems {
+function buildItems(qr: QrSymbol, preview: React.ReactNode): ReelItems {
   return [
     {
       id: "byzcard",
-      visual: (
-        <div className={styles.reelFace}>
-          <ExampleCard qr={qr} />
-        </div>
-      ),
+      // A compact, tappable miniature of the full card, so this state's
+      // footprint matches its neighbours and the stage never jumps.
+      visual: preview,
       title: "Your Byzcard",
       description:
         "Your details and a scannable QR code, created and stored on your device. This is the card you carry.",
@@ -177,12 +175,29 @@ function centerOf(rel: number, activeH: number, itemH: number): number {
  */
 export function ByzcardProductReel({ qr }: { qr: QrSymbol }) {
   const reduce = useReducedMotion();
-  // Stable element identities across ticks: the faces are built once per
-  // symbol, so a reel advance re-renders seats, not the face subtrees.
-  const items = useMemo(() => buildItems(qr), [qr]);
   const rootRef = useRef<HTMLDivElement>(null);
   const inView = useInView(rootRef, { amount: 0.3 });
   const [paused, setPaused] = useState(false);
+
+  // The first state's card expands into a focused overlay; while it is
+  // open the reel holds still, and closing hands focus back to the
+  // preview so the carousel resumes exactly where it was.
+  const [expanded, setExpanded] = useState(false);
+  const previewRef = useRef<HTMLButtonElement>(null);
+  const openCard = useCallback(() => {
+    setExpanded(true);
+  }, []);
+  const closeCard = useCallback(() => {
+    setExpanded(false);
+    previewRef.current?.focus();
+  }, []);
+
+  // Stable element identities across ticks: the faces are built once per
+  // symbol, so a reel advance re-renders seats, not the face subtrees.
+  const items = useMemo(
+    () => buildItems(qr, <ByzcardPreviewFace qr={qr} onExpand={openCard} buttonRef={previewRef} />),
+    [qr, openCard],
+  );
 
   // The seat and the direction of travel live in one state value so a single
   // pure updater sets both; direction decides which side the wrapped state
@@ -206,14 +221,14 @@ export function ByzcardProductReel({ qr }: { qr: QrSymbol }) {
   }, []);
 
   useEffect(() => {
-    if (reduce === true || paused || !inView) return;
+    if (reduce === true || paused || !inView || expanded) return;
     const timer = window.setInterval(() => {
       go(1);
     }, CYCLE_MS);
     return () => {
       window.clearInterval(timer);
     };
-  }, [reduce, paused, inView, go]);
+  }, [reduce, paused, inView, expanded, go]);
 
   // Natural content height per state, measured off the inner wrapper so the
   // stage can hug the active one instead of reserving room for the tallest.
@@ -297,9 +312,12 @@ export function ByzcardProductReel({ qr }: { qr: QrSymbol }) {
               key={entry.id}
               initial={false}
               className={measured ? styles.reelItem : styles.reelItemStatic}
+              // Only the front state accepts input (its card preview is a
+              // button); inert keeps the hidden copies out of the tab order.
+              inert={rel !== 0}
               style={{
                 zIndex: 3 - depth,
-                pointerEvents: "none",
+                pointerEvents: rel === 0 ? "auto" : "none",
                 ...(measured || index === 0 ? {} : { position: "absolute", visibility: "hidden" }),
               }}
               animate={
@@ -395,6 +413,12 @@ export function ByzcardProductReel({ qr }: { qr: QrSymbol }) {
           ))}
         </div>
       </div>
+
+      {/* Outside the transformed stage items, so position: fixed means the
+          viewport; inside the page tree, so the ink tokens still apply. */}
+      <AnimatePresence>
+        {expanded && <ByzcardExpanded qr={qr} onClose={closeCard} reduce={reduce} />}
+      </AnimatePresence>
     </div>
   );
 }

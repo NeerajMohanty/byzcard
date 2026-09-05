@@ -124,6 +124,7 @@ export function EditorScreen() {
   }, [profileInput]);
   const { state: shareState, oversize } = useShareQr(validFields);
   const previewPhotoUrl = useObjectUrl(photo?.blob ?? null);
+  const standalone = useClientValue(() => isStandaloneDisplay(), false);
   const standaloneIos = useClientValue(() => isStandaloneDisplay() && isIos(), false);
 
   const handleChange = (field: CardFieldName, value: string) => {
@@ -194,6 +195,7 @@ export function EditorScreen() {
           phone: values.phone,
           email: values.email,
           website: values.website,
+          linkedin: values.linkedin,
           social: linkGroups.social,
           messaging: linkGroups.messaging,
           links: linkGroups.links,
@@ -275,10 +277,12 @@ export function EditorScreen() {
           type="submit"
           disabled={saving || storageError !== null}
         >
-          {saving ? "Saving…" : "Save card"}
+          {saving ? "Saving…" : existing === null ? "Save card" : "Save changes"}
         </button>
         <p className="note" style={{ marginTop: 10 }}>
-          Your card and photo are stored only in this browser, on this device.
+          {standalone
+            ? "Your card and photo are stored only in Byzcard on this device."
+            : "Your card and photo are stored only in this browser, on this device."}
         </p>
       </form>
 

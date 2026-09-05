@@ -47,16 +47,21 @@ test("create → live preview → save → persist across reload → edit", asyn
   await expect(page.getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
   await expect(page.getByAltText("Photo of Ada Lovelace").first()).toBeVisible();
 
-  // Edit and persist again.
+  // Edit and persist again. Editing an existing card offers "Save changes"
+  // (creation keeps "Save card") and reuses the same stored record.
   await page.getByRole("link", { name: "Edit card" }).click();
+  await expect(page.getByRole("heading", { name: "Edit your card" })).toBeVisible();
+  await expect(page.getByLabel("Full name")).toHaveValue("Ada Lovelace");
   await page.getByLabel("Role / title").fill("Director of Research");
-  await page.getByRole("button", { name: "Save card" }).click();
+  await page.getByRole("button", { name: "Save changes" }).click();
   await page.waitForURL("**/card");
   await page.reload();
   // Scope to the visible card — the hidden print sheet repeats the role.
-  await expect(
-    page.getByRole("article", { name: "Business card preview" }).getByText("Director of Research"),
-  ).toBeVisible();
+  const edited = page.getByRole("article", { name: "Business card preview" });
+  await expect(edited.getByText("Director of Research")).toBeVisible();
+  // Untouched fields and the photo survive the edit.
+  await expect(edited.getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
+  await expect(page.getByAltText("Photo of Ada Lovelace").first()).toBeVisible();
 });
 
 test("QR share URL opens the recipient card with no photo fetch and no card request", async ({
@@ -387,7 +392,7 @@ test("Save card opens zero popups across 20 cycles and shows no debug copy", asy
     await page.getByRole("link", { name: "Edit card" }).click();
     await page.waitForURL("**/create");
     await page.getByLabel("Role / title").fill(`Role ${i}`);
-    const save = page.getByRole("button", { name: "Save card" });
+    const save = page.getByRole("button", { name: "Save changes" });
     if (i === 5)
       await save.dblclick(); // double-click stress
     else await save.click();

@@ -8,6 +8,13 @@ import { expect, test, type Page } from "@playwright/test";
 
 const DIR = "artifacts/ui-review";
 
+/**
+ * Full-page captures are rasterized at CSS scale. The landing page is
+ * ~11.5k CSS px tall on phones; at the iPhone's 3× device scale that is
+ * ~34.6k device px, past WebKit's 32767 px screenshot ceiling.
+ */
+const FULL_PAGE = { fullPage: true, scale: "css" } as const;
+
 const SECTIONS = [
   ["02-landing-how-it-works", "#how-it-works"],
   ["03-landing-share", "#share"],
@@ -35,7 +42,7 @@ test("capture landing screenshots (phone)", async ({ page, isMobile }, testInfo)
   await finalCta.scrollIntoViewIfNeeded();
   await page.screenshot({ path: shot("07-landing-final-cta") });
   if (testInfo.project.name === "mobile-webkit") {
-    await page.screenshot({ path: shot("landing-full"), fullPage: true });
+    await page.screenshot({ path: shot("landing-full"), ...FULL_PAGE });
   }
 });
 
@@ -53,5 +60,5 @@ test("capture landing screenshots (desktop)", async ({ page, isMobile }, testInf
   await page.screenshot({ path: shot("04-landing-final-cta-desktop") });
   await page.getByRole("contentinfo").scrollIntoViewIfNeeded();
   await page.screenshot({ path: shot("03-landing-footer-desktop") });
-  await page.screenshot({ path: shot("landing-full"), fullPage: true });
+  await page.screenshot({ path: shot("landing-full"), ...FULL_PAGE });
 });

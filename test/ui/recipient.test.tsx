@@ -34,6 +34,17 @@ describe("RecipientScreen", () => {
     // Initials avatar, never a fetched photo.
     expect(screen.getByText("ŠN")).toBeDefined();
     expect(document.querySelector("img")).toBeNull();
+    // Same ID card as the owner: LinkedIn is a Quick Access link inside it,
+    // while Save contact / Call / Email are app controls outside it.
+    const card = screen.getByRole("article", { name: "Business card preview" });
+    const linkedin = screen.getByRole("link", { name: "LinkedIn" });
+    expect(card.contains(linkedin)).toBe(true);
+    expect(linkedin.getAttribute("href")).toBe("https://www.linkedin.com/in/sarka");
+    expect(card.contains(screen.getByRole("button", { name: "Save contact" }))).toBe(false);
+    expect(card.contains(screen.getByRole("link", { name: "Call" }))).toBe(false);
+    expect(screen.getByRole("link", { name: "Call" }).getAttribute("href")).toBe(
+      "tel:+919876543210",
+    );
   });
 
   it("omits optional rows when absent", async () => {

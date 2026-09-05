@@ -1,126 +1,520 @@
+/* ── The Byzcard ID card ─────────────────────────────────────────────
+   One outer container, two sections: the dark profile and the light
+   Quick Access grid. Sizes live in custom properties so the two physical
+   print variants only re-tune numbers — the structure never changes. */
 .card {
-  /* The card keeps its approved dark treatment inside the light shell:
-     re-pin the tokens so descendants stay white-on-navy. */
-  --text: #ffffff;
-  --text-dim: #ffffff;
-  --label: #ffffff;
-  --card-edge: #1d2942;
-  background: linear-gradient(160deg, #0e1730 0%, #0b1220 55%, #0a101c 100%);
-  border: 1px solid var(--card-edge);
-  border-radius: var(--radius-card);
-  padding: 20px 20px 22px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-  color: var(--text);
+  --gold: #d9b26f;
+  --profile-text: #ffffff;
+  --profile-muted: rgba(255, 255, 255, 0.78);
+  --profile-line: rgba(255, 255, 255, 0.14);
+  position: relative;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(20, 28, 48, 0.14);
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgba(11, 18, 32, 0.22);
+  color: #171311;
 }
 
-.pronouns {
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0;
-  opacity: 0.8;
-  margin-left: 7px;
-  white-space: nowrap;
+/* ── Profile ── */
+.profile {
+  background: linear-gradient(160deg, #111f44 0%, #0b1530 52%, #0a1226 100%);
+  color: var(--profile-text);
+  padding: 22px 22px 22px;
 }
 
-.headline {
-  font-size: 12px;
-  line-height: 1.45;
-  margin: 4px 0 0;
-  opacity: 0.85;
-  overflow-wrap: anywhere;
+.photo {
+  float: right;
+  margin: 0 0 12px 18px;
 }
 
-.linkChips {
-  font-size: 10.5px;
-  font-weight: 650;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-align: center;
-  opacity: 0.8;
-  margin: 0 0 8px;
-}
-
-.label {
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--label);
-  margin: 0 0 2px;
-}
-
-.header {
-  display: flex;
-  justify-content: flex-end;
-  min-height: 40px;
-}
-
-/* Label + company name as one right-aligned stack sharing a right edge. */
-.headerStack {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  max-width: 70%;
-  text-align: right;
-}
-
-/* Compensate the label's trailing letter-spacing so its glyphs end on the
-   same right edge as the company name below it. */
-.headerStack .label {
-  margin-right: -0.14em;
-}
-
-.companyName {
+.company {
+  margin: 0 0 22px;
+  padding-top: 4px;
   font-size: 15px;
-  font-weight: 600;
-  margin: 0;
+  font-weight: 500;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
   overflow-wrap: anywhere;
 }
 
-.identity {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 18px 0 20px;
-}
-
-.identityText {
-  min-width: 0;
+.role {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  overflow-wrap: anywhere;
 }
 
 .name {
-  font-size: 24px;
+  margin: 0;
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: -0.01em;
-  margin: 2px 0 0;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
   overflow-wrap: anywhere;
 }
 
-.contact {
+.pronouns {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  opacity: 0.72;
+  white-space: nowrap;
+}
+
+.tagline {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--profile-muted);
+  overflow-wrap: anywhere;
+}
+
+.divider {
+  clear: both;
+  height: 1px;
+  margin: 18px 0 16px;
+  background: var(--profile-line);
+}
+
+.contactRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.contactList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 24px;
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.contactIcon {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(217, 178, 111, 0.55);
+  color: var(--gold);
+}
+
+.contactIcon svg {
+  width: 15px;
+  height: 15px;
 }
 
 .contactValue {
   font-size: 15px;
-  margin: 0;
+  line-height: 1.35;
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.qrWrap {
-  display: flex;
-  justify-content: center;
-  padding: 2px 0 4px;
+/* Tappable rows keep the card's plain look; hover/focus reveals it. */
+.contactLink {
+  color: inherit;
+  text-decoration: none;
 }
 
+.contactLink:hover,
+.contactLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.qrCol {
+  flex: 0 0 auto;
+  margin-left: auto;
+  width: clamp(104px, 30%, 128px);
+}
+
+/* The QR tile is always square; QrSvg supplies the white quiet zone. */
 .qrBox {
-  width: 140px;
-  max-width: 50%;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.scanHint {
+  display: none;
 }
 
 .placeholder {
-  color: var(--label);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Quick Access ── */
+.quick {
+  background: #fbfaf8;
+  border-top: 1px solid rgba(20, 28, 48, 0.08);
+  padding: 16px 18px 18px;
+  color: #171311;
+}
+
+.quickTitle {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+/* Two tiles per row; a lone tile, or the last of an odd count, stretches
+   across the row. Tiles wrap rather than scroll. */
+.quickGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quickCell {
+  display: flex;
+  flex: 1 1 calc(50% - 5px);
+  min-width: 112px;
+}
+
+.quickItem {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 12px;
+  border-radius: 13px;
+  border: 1px solid #e3e1dc;
+  background: #ffffff;
+  color: inherit;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+a.quickItem:hover {
+  border-color: #b9b5ad;
+  background: #fffdfa;
+}
+
+a.quickItem:focus-visible {
+  outline: 2px solid #171311;
+  outline-offset: 2px;
+}
+
+.quickIcon {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  display: flex;
+}
+
+/* Brand names fit on one line; a long custom hostname may take two. */
+.quickLabel {
+  min-width: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* Narrow cards (the landing hero column ramps down to 280px) tighten the
+   contact block so the QR keeps its place beside the rows. */
+@container (max-width: 330px) {
+  .profile {
+    padding: 18px 18px 18px;
+  }
+
+  .name {
+    font-size: 22px;
+  }
+
+  .contactList {
+    flex-basis: 120px;
+    gap: 10px;
+  }
+
+  .contactIcon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .contactValue {
+    font-size: 14px;
+  }
+
+  .qrCol {
+    width: 92px;
+  }
+
+  .quick {
+    padding: 14px 14px 16px;
+  }
+
+  .quickGrid {
+    gap: 8px;
+  }
+
+  .quickItem {
+    gap: 8px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .quickIcon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Narrower still: the QR moves under the contact rows (as the previous
+   card did), so phone and email keep the full width. */
+@container (max-width: 315px) {
+  .contactList {
+    flex-basis: 100%;
+  }
+
+  .qrCol {
+    width: 112px;
+    margin: 4px auto 0;
+  }
+}
+
+/* Wide cards (desktop column) fit three tiles per row. */
+@container (min-width: 420px) {
+  .quickCell {
+    flex-basis: calc(33.333% - 7px);
+  }
+}
+
+/* ── Print variants ───────────────────────────────────────────────────
+   Same structure and field rules at exact physical sizes. The wrapper in
+   print.module.css fixes the sheet size; the card fills it, the profile
+   grows, Quick Access keeps its natural height at the bottom edge. */
+.card[data-variant="cr80"],
+.card[data-variant="badge"] {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.card[data-variant="cr80"] .profile,
+.card[data-variant="badge"] .profile {
+  flex: 1 1 auto;
+  min-height: 0;
+  /* Fixed physical height: the profile can never paint over Quick Access. */
+  overflow: hidden;
+}
+
+/* Paper has no scroll: identity lines clamp instead of growing. */
+.card[data-variant="cr80"] .company,
+.card[data-variant="cr80"] .role,
+.card[data-variant="cr80"] .name,
+.card[data-variant="cr80"] .tagline,
+.card[data-variant="badge"] .role,
+.card[data-variant="badge"] .tagline {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card[data-variant="badge"] .company,
+.card[data-variant="badge"] .name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.card[data-variant="cr80"] .quick,
+.card[data-variant="badge"] .quick {
+  flex: 0 0 auto;
+}
+
+.card[data-variant="cr80"] .quickGrid,
+.card[data-variant="badge"] .quickGrid {
+  overflow: hidden;
+}
+
+/* Standard ID card — CR80, 3.375 × 2.125 in landscape. */
+.card[data-variant="cr80"] .profile {
+  padding: 0.11in 0.14in 0.09in;
+}
+
+.card[data-variant="cr80"] .photo {
+  margin: 0 0 0.04in 0.1in;
+}
+
+.card[data-variant="cr80"] .company {
+  margin: 0 0 0.06in;
+  padding-top: 0;
+  font-size: 6.5pt;
+}
+
+.card[data-variant="cr80"] .role {
+  margin-bottom: 0.015in;
+  font-size: 4.8pt;
+  letter-spacing: 0.14em;
+}
+
+.card[data-variant="cr80"] .name {
+  font-size: 11.5pt;
+  line-height: 1.1;
+}
+
+.card[data-variant="cr80"] .pronouns {
+  font-size: 6pt;
+}
+
+.card[data-variant="cr80"] .tagline {
+  margin-top: 0.02in;
+  font-size: 6pt;
+}
+
+.card[data-variant="cr80"] .divider {
+  margin: 0.06in 0 0.055in;
+}
+
+.card[data-variant="cr80"] .contactRow {
+  gap: 0.1in;
+}
+
+.card[data-variant="cr80"] .contactList {
+  gap: 0.035in;
+  flex-basis: 1in;
+}
+
+.card[data-variant="cr80"] .contactItem {
+  gap: 0.05in;
+}
+
+.card[data-variant="cr80"] .contactIcon {
+  width: 0.15in;
+  height: 0.15in;
+}
+
+.card[data-variant="cr80"] .contactIcon svg {
+  width: 0.075in;
+  height: 0.075in;
+}
+
+.card[data-variant="cr80"] .contactValue {
+  font-size: 6.2pt;
+  line-height: 1.25;
+}
+
+.card[data-variant="cr80"] .qrCol {
+  width: 0.7in;
+}
+
+.card[data-variant="cr80"] .quick {
+  padding: 0.05in 0.14in 0.06in;
+}
+
+.card[data-variant="cr80"] .quickTitle {
+  display: none;
+}
+
+.card[data-variant="cr80"] .quickGrid {
+  gap: 0.04in;
+  max-height: 0.46in;
+}
+
+.card[data-variant="cr80"] .quickCell {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.card[data-variant="cr80"] .quickItem {
+  min-height: 0.19in;
+  padding: 0 0.06in;
+  gap: 0.04in;
+  border-radius: 0.06in;
+  font-size: 5.2pt;
+}
+
+.card[data-variant="cr80"] .quickIcon {
+  width: 0.11in;
+  height: 0.11in;
+}
+
+/* Event badge — 4 × 6 in portrait. */
+.card[data-variant="badge"] .profile {
+  padding: 0.3in 0.3in 0.24in;
+}
+
+.card[data-variant="badge"] .company {
+  margin-bottom: 0.16in;
+  font-size: 10.5pt;
+}
+
+.card[data-variant="badge"] .role {
+  font-size: 7.5pt;
+}
+
+.card[data-variant="badge"] .name {
+  font-size: 20pt;
+}
+
+.card[data-variant="badge"] .pronouns {
+  font-size: 9pt;
+}
+
+.card[data-variant="badge"] .tagline {
+  font-size: 9.5pt;
+}
+
+.card[data-variant="badge"] .divider {
+  margin: 0.14in 0 0.12in;
+}
+
+.card[data-variant="badge"] .contactValue {
+  font-size: 9pt;
+}
+
+.card[data-variant="badge"] .qrCol {
+  width: 1.3in;
+}
+
+.card[data-variant="badge"] .scanHint {
+  display: block;
+  margin: 0.05in 0 0;
+  font-size: 8pt;
+  text-align: center;
+  color: var(--profile-muted);
+}
+
+.card[data-variant="badge"] .quickGrid {
+  max-height: 1.1in;
 }

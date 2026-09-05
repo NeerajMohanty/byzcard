@@ -71,10 +71,14 @@
 /* The featured object: the hero card and the owner card in the demo. Both
    are the same CardView — only its outer presentation is set here. */
 .reelFace > article {
-  background: var(--ink-face);
+  background: transparent;
   border: 1px solid var(--ink-border);
   border-top-color: var(--ink-border-top);
   border-bottom-color: var(--ink-border-bottom);
+}
+
+.reelFace > article [data-part="profile"] {
+  background: var(--ink-face);
 }
 
 .container {
@@ -296,7 +300,8 @@
    cool, one warm — giving the blur something with structure to smear. */
 .inkGlass {
   position: relative;
-  border-radius: var(--radius-card);
+  /* Matches the ID card's corner so the glare and sheen overlays sit flush. */
+  border-radius: 22px;
 }
 
 /* Cool navy pool, lower right. */
@@ -335,16 +340,8 @@
 .inkGlass > article {
   position: relative;
   z-index: 1;
-  background: linear-gradient(
-    166deg,
-    rgba(22, 35, 62, 0.82) 0%,
-    rgba(13, 21, 39, 0.88) 44%,
-    rgba(7, 12, 23, 0.93) 100%
-  );
-  /* Standard property only: the build auto-prefixes it. A hand-written
-     -webkit- twin makes the minifier keep just the prefixed copy, which
-     this engine ignores — the blur silently vanishes from the build. */
-  backdrop-filter: blur(22px) saturate(1.5);
+  /* No opaque backing: the two sections below are the glass faces. */
+  background: transparent;
   border: 1px solid rgba(126, 158, 220, 0.26);
   border-top-color: rgba(186, 210, 250, 0.55);
   border-bottom-color: rgba(4, 8, 16, 0.85);
@@ -356,6 +353,29 @@
     inset 0 -40px 70px -50px rgba(226, 182, 130, 0.2),
     var(--ink-thickness-3),
     var(--ink-lift-3);
+}
+
+/* The dark profile section is the smoked-glass face, exactly as the whole
+   card was before it gained Quick Access; the Quick Access section below
+   it is frosted white glass over the same field, so the card still reads
+   as one translucent object. */
+.inkGlass > article [data-part="profile"] {
+  background: linear-gradient(
+    166deg,
+    rgba(22, 35, 62, 0.82) 0%,
+    rgba(13, 21, 39, 0.88) 44%,
+    rgba(7, 12, 23, 0.93) 100%
+  );
+  /* Standard property only: the build auto-prefixes it. A hand-written
+     -webkit- twin makes the minifier keep just the prefixed copy, which
+     this engine ignores — the blur silently vanishes from the build. */
+  backdrop-filter: blur(22px) saturate(1.5);
+}
+
+.inkGlass > article [data-part="quick"] {
+  background: rgba(255, 253, 250, 0.72);
+  backdrop-filter: blur(22px) saturate(1.4);
+  border-top-color: rgba(126, 158, 220, 0.28);
 }
 
 /* One specular streak reading across the upper-left face. */
@@ -988,6 +1008,130 @@
   outline: 2px solid var(--text);
   outline-offset: 1px;
   border-radius: 50%;
+}
+
+/* ── Reel state 1: compact card preview, expandable to the full card ──
+   The full ID card would tower over the other states, so the reel seats
+   a scaled miniature — the real CardView laid out at reel width behind a
+   scale transform — and expands it into a focused overlay on tap. */
+.previewButton {
+  position: relative;
+  display: block;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 14px;
+  /* Estimated footprint until the miniature is measured; the exact
+     scaled height then arrives as an inline style. */
+  aspect-ratio: 340 / 523;
+  transition: transform 0.25s ease;
+}
+
+@media (hover: hover) {
+  .previewButton:hover {
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .previewButton {
+    transition: none;
+  }
+}
+
+.previewButton:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
+
+/* The full-size card, pinned to the top centre and scaled in place;
+   clicks fall through to the button. */
+.previewCanvas {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform-origin: top center;
+  pointer-events: none;
+}
+
+/* A badge straddling the card's bottom edge, so it never hides a tile. */
+.previewHint {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+  z-index: 2;
+  white-space: nowrap;
+  pointer-events: none;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 13px;
+  border-radius: 999px;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--e-paper-top) 0%, var(--e-paper-bottom) 100%);
+  border: 1px solid var(--e-line-base);
+  box-shadow:
+    inset 0 1px 0 var(--e-sheen),
+    var(--elev-1);
+}
+
+/* ── The expanded card overlay ── */
+.expandBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(16, 12, 9, 0.6);
+}
+
+.expandDialog {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(360px, 100%);
+  max-height: 100%;
+}
+
+.expandBar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.expandClose {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.expandClose:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.expandClose:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Shorter viewports scroll the card instead of clipping Quick Access. */
+.expandScroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 22px;
 }
 
 .stackAvatar {

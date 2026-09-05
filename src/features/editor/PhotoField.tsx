@@ -60,7 +60,14 @@ export function PhotoField({
     <div className="field">
       <label htmlFor="photo-input">Professional photo (optional)</label>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-        <Avatar fullName={fullName} photoUrl={previewUrl} size={80} crop={crop} aspect={aspect} />
+        <Avatar
+          fullName={fullName}
+          photoUrl={previewUrl}
+          size={80}
+          crop={crop}
+          aspect={aspect}
+          shape="circle"
+        />
         <div className="stack" style={{ flex: 1 }}>
           <button
             type="button"

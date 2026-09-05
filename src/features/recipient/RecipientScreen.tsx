@@ -2,29 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  displayName,
-  displayUrl,
-  linkEntryLabel,
-  type LinkEntry,
-  type LinkGroup,
-} from "@/core/card/types";
+import { mailtoHref, telHref } from "@/core/card/links";
 import { decodeSharePayload, type SharePayload, type ShareDecodeError } from "@/core/share/codec";
 import { buildVcard, vcardFilename } from "@/core/vcard/build";
 import { shareOrDownloadFile } from "@/adapters/share/webShare";
-import { Avatar } from "@/components/Avatar";
-import styles from "./RecipientScreen.module.css";
+import { CardView } from "@/components/CardView";
 
 type State =
   | { kind: "loading" }
   | { kind: "ready"; payload: SharePayload }
   | { kind: "error"; error: ShareDecodeError };
-
-/** Populated optional entries flattened as (group, entry) action rows. */
-function optionalActions(payload: SharePayload): { group: LinkGroup; entry: LinkEntry }[] {
-  const groups: LinkGroup[] = ["social", "messaging", "links"];
-  return groups.flatMap((group) => (payload[group] ?? []).map((entry) => ({ group, entry })));
-}
 
 const ERROR_MESSAGES: Record<ShareDecodeError, string> = {
   empty: "This link does not contain a card. Ask the sender to share it again.",
@@ -36,9 +23,10 @@ const ERROR_MESSAGES: Record<ShareDecodeError, string> = {
 };
 
 /**
- * Recipient viewer: decodes the card entirely from the URL fragment.
- * The fragment never reaches any server, no photo is fetched, and no
- * lookup of any kind occurs.
+ * Recipient viewer: decodes the card entirely from the URL fragment and
+ * renders the same ID card the owner sees (no photo — it never travels in
+ * the link). The fragment never reaches any server and no lookup occurs.
+ * Contact actions sit below the card; they are app controls, not card content.
  */
 export function RecipientScreen() {
   const [state, setState] = useState<State>({ kind: "loading" });
@@ -74,74 +62,19 @@ export function RecipientScreen() {
 
   return (
     <div>
-      <article className={styles.card} aria-label={`Business card of ${card.fullName}`}>
-        <div className={styles.top}>
-          <Avatar fullName={card.fullName} photoUrl={null} size={76} />
-          <div className={styles.identity}>
-            <h1 className={styles.name}>
-              {displayName(card)}
-              {card.pronouns !== undefined && (
-                <span className={styles.pronouns}>({card.pronouns})</span>
-              )}
-            </h1>
-            <p className={styles.role}>{card.role}</p>
-            {card.headline !== undefined && <p className={styles.headline}>{card.headline}</p>}
-            <p className={styles.company}>{card.company}</p>
-          </div>
-        </div>
-        <dl className={styles.details}>
-          <dt>Phone</dt>
-          <dd>
-            <a href={`tel:${card.phone.replace(/[^+0-9]/gu, "")}`}>{card.phone}</a>
-          </dd>
-          <dt>Email</dt>
-          <dd>
-            <a href={`mailto:${card.email}`}>{card.email}</a>
-          </dd>
-          {card.website !== undefined && (
-            <>
-              <dt>Website</dt>
-              <dd>
-                <a href={card.website} rel="noopener noreferrer" target="_blank">
-                  {displayUrl(card.website)}
-                </a>
-              </dd>
-            </>
-          )}
-          {card.linkedin !== undefined && (
-            <>
-              <dt>LinkedIn</dt>
-              <dd>
-                <a href={card.linkedin} rel="noopener noreferrer" target="_blank">
-                  {displayUrl(card.linkedin)}
-                </a>
-              </dd>
-            </>
-          )}
-        </dl>
-      </article>
+      <CardView fields={card} photoUrl={null} qr={null} interactive />
 
-      <div className="stack" style={{ marginTop: 16 }}>
+      <h2 className="section-title">Contact actions</h2>
+      <div className="stack">
         <button className="btn btn-primary" type="button" onClick={() => void saveContact()}>
           Save contact
         </button>
-        <a className="btn" href={`tel:${card.phone.replace(/[^+0-9]/gu, "")}`}>
+        <a className="btn" href={telHref(card.phone)}>
           Call
         </a>
-        <a className="btn" href={`mailto:${card.email}`}>
+        <a className="btn" href={mailtoHref(card.email)}>
           Email
         </a>
-        {optionalActions(card).map(({ group, entry }) => (
-          <a
-            key={`${group}-${entry.service}-${entry.value}`}
-            className="btn"
-            href={entry.value}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            {linkEntryLabel(group, entry)}
-          </a>
-        ))}
       </div>
 
       <p className="note" style={{ marginTop: 20, textAlign: "center" }}>

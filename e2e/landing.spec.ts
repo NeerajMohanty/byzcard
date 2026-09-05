@@ -25,7 +25,11 @@ test("loads with hero, real example card and QR", async ({ page }) => {
   // Preferred name replaces the full name on the card, with pronouns beside it.
   await expect(page.getByRole("heading", { name: /^John\s*\(he\/him\)$/u }).first()).toBeVisible();
   await expect(page.getByText("Designing simple digital experiences").first()).toBeVisible();
-  await expect(page.getByText("LinkedIn · WhatsApp · GitHub").first()).toBeVisible();
+  // The example card carries its links as Quick Access tiles (labels, not links).
+  const exampleCard = page.getByRole("article", { name: "Business card preview" }).first();
+  for (const label of ["LinkedIn", "WhatsApp", "GitHub"]) {
+    await expect(exampleCard.getByText(label, { exact: true })).toBeVisible();
+  }
   await expect(page.getByRole("img", { name: /QR code/u }).first()).toBeVisible();
   // Exactly two GitHub links — Open Source and footer — both to the public repo.
   const githubLinks = page.getByRole("link", { name: /GitHub/u });
@@ -272,4 +276,53 @@ test("ways to share is one seven-card stack holding every method", async ({ page
     .first()
     .evaluate((el) => getComputedStyle(el).position);
   expect(sticky).toBe("sticky");
+});
+
+/**
+ * Meet/Scan/Save reel: state 1 is a compact preview of the ID card that
+ * expands into an overlay, so the stage no longer jumps between a
+ * full-height card and the small mocks.
+ */
+test("reel first state is compact, expandable, and height-stable", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("#how-it-works").scrollIntoViewIfNeeded();
+
+  // Pause the reel deterministically before measuring and interacting.
+  const dots = page.getByRole("group", { name: "Demo states" }).getByRole("button");
+  await dots.first().click();
+
+  // Every state's intrinsic footprint sits in one height band — the full
+  // card (~520px before the fix) no longer towers over the mocks.
+  const heights = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("[data-reel-id]")).map(
+      (node) => (node as HTMLElement).offsetHeight,
+    ),
+  );
+  expect(heights).toHaveLength(4);
+  expect(Math.max(...heights) - Math.min(...heights)).toBeLessThan(150);
+
+  // Expand: the complete canonical card, Quick Access included.
+  const preview = page.getByRole("button", { name: "View your Byzcard at full size" });
+  await preview.click();
+  const dialog = page.getByRole("dialog", { name: "Your Byzcard, full size" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("heading", { name: /^John/u })).toBeVisible();
+  await expect(dialog.getByText("Quick Access")).toBeVisible();
+  for (const label of ["LinkedIn", "WhatsApp", "GitHub"]) {
+    await expect(dialog.getByText(label, { exact: true })).toBeVisible();
+  }
+
+  // Escape closes, focus returns to the preview, the reel stays on state 1.
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(preview).toBeFocused();
+  await expect(dots.first()).toHaveAttribute("aria-current", "true");
+
+  // Reopen works after navigating away and back.
+  await dots.nth(2).click();
+  await dots.first().click();
+  await preview.click();
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Close full card view" }).click();
+  await expect(dialog).not.toBeVisible();
 });

@@ -48,8 +48,10 @@ src/core/       Pure TypeScript. No React, DOM, IndexedDB, or Wallet
 src/adapters/   Real I/O boundaries: idb/, photo/ (Canvas), share/
                 (Web Share), nfc/ (Web NFC), wallet/ (endpoint client)
 src/features/   Screen-level React: editor/, card/, recipient/
-src/components/ Shared presentational pieces (CardView is the single
-                card renderer used by preview, card screen, and landing)
+src/components/ Shared presentational pieces (CardView is the single ID
+                card renderer — dark profile + Quick Access in one
+                container — used by the preview, card screen, recipient
+                page, landing example and both print formats)
 src/server/     Server-only: env (credential access + runtime guard),
                 der/cms (hand-rolled PKCS#7), zip, png, crc32,
                 apple/pass, google/jwt, http, walletRequest
@@ -84,9 +86,10 @@ URL = {origin}/s#{fragment}
 
 A static page. The HTTP request is for `/s` only — the fragment stays in
 the browser (RFC 3986; verified in E2E by recording all requests). The
-page decodes and validates locally, renders an initials avatar (no photo
-fetch — there is nowhere to fetch from), and offers Save Contact / Call /
-Email / links. No `/api/card`, no `/profile/{id}`, no lookups.
+page decodes and validates locally, renders the same ID card with an
+initials avatar (no photo fetch — there is nowhere to fetch from) and its
+links in Quick Access, and offers Save Contact / Call / Email below it.
+No `/api/card`, no `/profile/{id}`, no lookups.
 
 ## Photo pipeline
 
@@ -132,13 +135,14 @@ Installation adds no server persistence of any kind.
 
 ## Printing (local-only)
 
-src/features/print renders two print-only layouts in exact physical CSS
-units with per-format @page rules — Standard ID Card (CR80,
-3.375 × 2.125 in, landscape) and Event Badge (4 × 6 in, portrait) — and
-hands off to window.print(); the browser dialog provides physical printing
-and Save as PDF. Print at 100% / Actual size (printer variance exists);
-enable background graphics for the dark card. The badge omits
-phone/email — its large QR carries the digital contact. Nothing is
+src/features/print renders the ID card (CardView print variants) on two
+print-only sheets in exact physical CSS units with per-format @page rules
+— Standard ID Card (CR80, 3.375 × 2.125 in, landscape) and Event Badge
+(4 × 6 in, portrait) — and hands off to window.print(); the browser dialog
+provides physical printing and Save as PDF. Print at 100% / Actual size
+(printer variance exists); enable background graphics for the dark
+profile section. Quick Access prints as plain labels (two rows at most);
+the QR carries every link digitally. Nothing is
 uploaded; no PDF service exists. Future direction (not implemented):
 local CSV → batch badges.
 

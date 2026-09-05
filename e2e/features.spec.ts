@@ -17,28 +17,34 @@ test.afterEach(() => {
   guard.assertClean();
 });
 
-test("owner card: 96px photo, and blank website renders a presentation-only em dash", async ({
+test("owner card: circular photo, and a blank website hides the row (no dash)", async ({
   page,
   context,
 }) => {
   await createCard(page, true, false); // photo yes, website no
   const photo = page.getByAltText(`Photo of ${TEST_CARD.fullName}`).first();
   await expect(photo).toBeVisible();
-  // 96px-wide 4:5 portrait frame (the img itself carries the crop layout).
+  // Circular frame around the stored 4:5 crop window (the img keeps the crop layout).
   const frame = await photo.evaluate((el) => {
-    const parent = el.parentElement;
-    return { width: parent?.style.width, height: parent?.style.height };
+    const ring = el.parentElement?.parentElement;
+    return {
+      width: ring?.style.width,
+      height: ring?.style.height,
+      radius: ring?.style.borderRadius,
+    };
   });
-  expect(frame).toEqual({ width: "96px", height: "120px" });
+  expect(frame).toEqual({ width: "104px", height: "104px", radius: "50%" });
 
-  // WEBSITE row present with em dash on the owner card (scoped to the
-  // visible card — the hidden print sheet repeats these strings).
+  // No Website row and no filler dash anywhere in the card.
   const cardArticle = page.getByRole("article", { name: "Business card preview" });
-  await expect(cardArticle.getByText("Website", { exact: true })).toBeVisible();
-  await expect(cardArticle.getByText("—", { exact: true })).toBeVisible();
+  expect(await cardArticle.getByText("Website").count()).toBe(0);
+  expect(await cardArticle.getByText("—").count()).toBe(0);
+  // The card carries the profile section only — no Quick Access shell for zero links.
+  await expect(cardArticle.locator("[data-part='profile']")).toBeVisible();
+  expect(await cardArticle.locator("[data-part='quick']").count()).toBe(0);
 
-  // The em dash never leaks: share URL decodes without a website, and the
-  // recipient page shows no Website row or action.
+  // Nothing leaks: share URL decodes without a website, and the recipient
+  // card shows no Website row or action either.
   const shareUrl = await page.locator("[data-share-url]").getAttribute("data-share-url");
   expect(shareUrl).not.toBeNull();
   expect(shareUrl).not.toContain(encodeURIComponent("—"));
@@ -46,8 +52,6 @@ test("owner card: 96px photo, and blank website renders a presentation-only em d
   guard.watch(recipient);
   await recipient.goto(shareUrl ?? "");
   await expect(recipient.getByRole("heading", { name: TEST_CARD.fullName })).toBeVisible();
-  // No Website row/action and no em dash inside the recipient card itself
-  // (the page footer prose legitimately contains an em dash).
   const recipientCard = recipient.getByRole("article");
   expect(await recipientCard.getByText("Website").count()).toBe(0);
   expect(await recipientCard.getByText("—").count()).toBe(0);
@@ -91,22 +95,25 @@ test("web app manifest is served with the Byzcard install contract", async ({ pa
   }
 });
 
-test("Quick Access sits above Wallet and captures the native install prompt (Chromium)", async ({
+test("Home Screen install sits above Share and captures the native install prompt (Chromium)", async ({
   page,
   browserName,
 }) => {
   test.skip(browserName !== "chromium", "beforeinstallprompt is a Chromium API");
   await createCard(page);
 
-  // Section hierarchy: Quick access before Share before Print before Wallet.
+  // Section hierarchy: Home Screen before Share before Print before Wallet.
   // (Anchor on a rendered heading first — the headings appear together once
   // the card loads from IndexedDB.)
-  await expect(page.getByRole("heading", { name: "Quick access" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Home Screen" })).toBeVisible();
   const sections = await page.locator("h2").allTextContents();
-  const quickIndex = sections.findIndex((s) => /quick access/iu.test(s));
+  const quickIndex = sections.findIndex((s) => /home screen/iu.test(s));
   const shareIndex = sections.findIndex((s) => /^share$/iu.test(s.trim()));
   expect(quickIndex).toBeGreaterThanOrEqual(0);
   expect(shareIndex).toBeGreaterThan(quickIndex);
+  // The install control is an app action, outside the ID card.
+  const card = page.getByRole("article", { name: "Business card preview" });
+  expect(await card.getByRole("button", { name: "Add Byzcard to Home Screen" }).count()).toBe(0);
   // Secondary tools are collapsed disclosure rows below Share, in order.
   await expect(page.locator("summary.disclosure-summary")).toHaveText([
     "Do you want to print this?",

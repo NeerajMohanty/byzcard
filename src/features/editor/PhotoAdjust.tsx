@@ -153,6 +153,9 @@ export function PhotoAdjust({
               cursor: "grab",
               width: STAGE_WIDTH,
               userSelect: "none",
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: Math.round(STAGE_WIDTH * 0.125),
             }}
           >
             <Avatar
@@ -161,6 +164,22 @@ export function PhotoAdjust({
               size={STAGE_WIDTH}
               crop={crop}
               aspect={aspect}
+            />
+            {/* The card shows the circle inscribed in this 4:5 window (full
+                width, vertically centred); the shade marks what stays outside. */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: 0,
+                top: "10%",
+                width: "100%",
+                aspectRatio: "1 / 1",
+                borderRadius: "50%",
+                border: "1px solid rgba(255, 255, 255, 0.75)",
+                boxShadow: "0 0 0 999px rgba(0, 0, 0, 0.42)",
+                pointerEvents: "none",
+              }}
             />
           </div>
         </div>

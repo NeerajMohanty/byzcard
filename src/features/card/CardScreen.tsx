@@ -62,6 +62,7 @@ export function CardScreen() {
           qr={shareState?.qr ?? null}
           photoCrop={photo?.crop}
           photoAspect={photoAspect}
+          interactive
         />
         {shareState !== null && (
           // Invisible marker: carries the share URL for automated tests and
@@ -69,7 +70,9 @@ export function CardScreen() {
           <span data-share-url={shareState.shareUrl} hidden />
         )}
 
-        <h2 className="section-title">Quick access</h2>
+        {/* Quick Access links live inside the ID card above; this section
+            holds the app-level Home Screen install action. */}
+        <h2 className="section-title">Home Screen</h2>
         <QuickAccess card={card} photo={photo} />
 
         <h2 className="section-title">Share</h2>

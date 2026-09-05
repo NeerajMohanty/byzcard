@@ -5,7 +5,7 @@ import { PrintSheets } from "@/features/print/PrintSheets";
 import { buildCard, validateCardFields } from "@/core/card/validate";
 import { encodeQrText } from "@/core/qr";
 
-function makeCard(withWebsite: boolean) {
+function makeCard(withWebsite: boolean, withLinks = false) {
   const validated = validateCardFields({
     fullName: "Ada Lovelace",
     role: "Chief Analyst",
@@ -13,6 +13,8 @@ function makeCard(withWebsite: boolean) {
     phone: "+1 647 000 0000",
     email: "ada@example.com",
     website: withWebsite ? "example.com" : "",
+    linkedin: withLinks ? "linkedin.com/in/ada" : "",
+    links: withLinks ? [{ service: "github", value: "github.com/ada" }] : [],
   });
   if (!validated.ok) throw new Error("fixture invalid");
   return buildCard(validated.fields);
@@ -83,17 +85,36 @@ describe("PrintSheets", () => {
     expect(sheet).not.toBeNull();
     expect(sheet?.textContent).toContain("Scan to connect");
     expect(container.querySelector("style")?.textContent).toContain("4in 6in");
-    // Badge deliberately omits phone/email — the QR carries the contact.
-    expect(sheet?.textContent).not.toContain("ada@example.com");
+    // The badge is the same ID card: contact rows included.
+    expect(sheet?.textContent).toContain("ada@example.com");
   });
 
-  it("uses the presentation-only em dash for a blank website on CR80", () => {
+  it("omits the website row on a blank website — never a placeholder dash", () => {
     const { container } = render(
       <PrintSheets format="cr80" card={makeCard(false)} photoUrl={null} qr={QR} />,
     );
     const sheet = container.querySelector("[data-print-format='cr80']");
-    expect(sheet?.textContent).toContain("Website");
-    expect(sheet?.textContent).toContain("—");
+    expect(sheet?.textContent).not.toContain("Website");
+    expect(sheet?.textContent).not.toContain("—");
+  });
+
+  it("both formats print the complete ID card: profile + Quick Access, no app controls", () => {
+    for (const format of ["cr80", "badge"] as const) {
+      const { container, unmount } = render(
+        <PrintSheets format={format} card={makeCard(true, true)} photoUrl={null} qr={QR} />,
+      );
+      const sheet = container.querySelector(`[data-print-format='${format}']`);
+      expect(sheet?.querySelector("[data-part='profile']"), format).not.toBeNull();
+      const quick = sheet?.querySelector("[data-part='quick']");
+      expect(quick, format).not.toBeNull();
+      expect(quick?.textContent).toContain("LinkedIn");
+      expect(quick?.textContent).toContain("GitHub");
+      // Paper: labels only — no anchors, no buttons, no app chrome.
+      expect(sheet?.querySelector("a, button")).toBeNull();
+      expect(sheet?.textContent).not.toContain("Save contact");
+      expect(sheet?.textContent).not.toContain("Home Screen");
+      unmount();
+    }
   });
 
   it("renders a square QR tile in both formats", () => {
@@ -101,9 +122,10 @@ describe("PrintSheets", () => {
       const { container, unmount } = render(
         <PrintSheets format={format} card={makeCard(true)} photoUrl={null} qr={QR} />,
       );
-      const qr = container.querySelector("[role='img']");
-      expect(qr, format).not.toBeNull();
-      // Scope to the QR tile: the brand lockup contributes its own svg.
+      // The QR tile is the only element with an explicit img role (icons are decorative).
+      const tiles = container.querySelectorAll("[role='img']");
+      expect(tiles, format).toHaveLength(1);
+      const qr = tiles[0];
       expect(qr?.querySelector("svg")?.getAttribute("viewBox")).toBe(`0 0 ${QR.size} ${QR.size}`);
       unmount();
     }

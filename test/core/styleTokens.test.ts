@@ -9,21 +9,29 @@ import { describe, expect, it } from "vitest";
 
 const read = (...path: string[]): string => readFileSync(join(process.cwd(), ...path), "utf8");
 
-describe("approved card style tokens", () => {
+describe("approved ID card contract", () => {
   const cardCss = read("src", "components", "CardView.module.css");
   const cardTsx = read("src", "components", "CardView.tsx");
 
-  it("QR stays at the approved reduced size (140px)", () => {
-    expect(cardCss).toContain("width: 140px");
+  it("is one container with a profile section followed by a Quick Access section", () => {
+    expect(cardTsx).toContain('data-part="profile"');
+    expect(cardTsx).toContain('data-part="quick"');
+    expect(cardTsx.indexOf('data-part="profile"')).toBeLessThan(
+      cardTsx.indexOf('data-part="quick"'),
+    );
   });
 
-  it("company label/value alignment stack remains", () => {
-    expect(cardCss).toContain(".headerStack");
-    expect(cardCss).toContain("align-items: flex-end");
+  it("uses a circular photo", () => {
+    expect(cardTsx).toContain('shape="circle"');
   });
 
-  it("card portrait is 96px", () => {
-    expect(cardTsx).toContain("size={96}");
+  it("keeps the QR tile square", () => {
+    expect(cardCss).toContain("aspect-ratio: 1 / 1");
+  });
+
+  it("defines both print variants in the same stylesheet as the screen card", () => {
+    expect(cardCss).toContain('[data-variant="cr80"]');
+    expect(cardCss).toContain('[data-variant="badge"]');
   });
 });
 
